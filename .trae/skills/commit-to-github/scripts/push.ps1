@@ -9,8 +9,8 @@ $repoUrl = "git@github.com:dada21234/wujunlong912.git"
 $root = (Resolve-Path (Join-Path $PSScriptRoot "..\..\..\..")).Path
 Set-Location $root
 
-# Auto-accept github.com host key on first connection
-$env:GIT_SSH_COMMAND = "ssh -o StrictHostKeyChecking=accept-new"
+# Auto-accept host key; use SSH over port 443 (port 22 is blocked on this network)
+$env:GIT_SSH_COMMAND = "ssh -o StrictHostKeyChecking=accept-new -o HostName=ssh.github.com -o Port=443"
 
 # 1. Init repo if missing, default branch main
 if (-not (Test-Path (Join-Path $root ".git"))) {
@@ -22,9 +22,12 @@ if (-not (Test-Path (Join-Path $root ".git"))) {
 }
 
 # 2. Configure origin remote (update URL if it already exists)
-git remote add origin $repoUrl 2>$null
-if ($LASTEXITCODE -ne 0) {
+$remotes = @(git remote)
+if ($remotes -contains "origin") {
     git remote set-url origin $repoUrl
+}
+else {
+    git remote add origin $repoUrl
 }
 
 # 3. Stage all changes
