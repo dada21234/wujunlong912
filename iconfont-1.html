@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Font Awesome 图标 · 字体图标方式</title>
+  <!-- 本地化的 Font Awesome CDN 文件：CSS 与 woff2 字体均已下载到 cdn 目录 -->
+  <link rel="stylesheet" href="cdn/css/all.min.css">
+  <style>
+    /* 命名规则：本项目自定义的类名 / id / CSS 变量均以 wjl_ 开头（fa-* 为 Font Awesome 官方类名） */
+    :root {
+      --wjl-paper: #F6F4EE;
+      --wjl-card: #FFFFFF;
+      --wjl-ink: #23252B;
+      --wjl-ink-soft: #3A3F4B;
+      --wjl-ink-mute: #8A8F99;
+      --wjl-line: rgba(35, 37, 43, 0.10);
+      --wjl-accent: #3056D3;
+      --wjl-accent-soft: rgba(48, 86, 211, 0.10);
+      --wjl-font-sans: "Segoe UI", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      --wjl-font-mono: "Cascadia Code", Consolas, "SF Mono", ui-monospace, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--wjl-paper);
+      color: var(--wjl-ink);
+      font-family: var(--wjl-font-sans);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== 顶部导航 ===== */
+    #wjl_topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      background: rgba(246, 244, 238, 0.82);
+      border-bottom: 1px solid var(--wjl-line);
+      backdrop-filter: blur(10px);
+    }
+
+    .wjl_brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .wjl_brand-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: var(--wjl-ink);
+      color: #FFFFFF;
+      font-size: 15px;
+    }
+
+    .wjl_brand-text {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .wjl_brand-text small {
+      display: block;
+      color: var(--wjl-ink-mute);
+      font-family: var(--wjl-font-mono);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+    }
+
+    .wjl_back {
+      color: var(--wjl-ink);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 8px 18px;
+      border: 1px solid var(--wjl-line);
+      border-radius: 999px;
+      background: var(--wjl-card);
+      transition: border-color 150ms ease, color 150ms ease, transform 150ms ease;
+    }
+
+    .wjl_back:hover {
+      border-color: var(--wjl-accent);
+      color: var(--wjl-accent);
+      transform: translateY(-1px);
+    }
+
+    /* ===== 装饰性光晕 ===== */
+    #wjl_stage {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wjl_blob {
+      position: absolute;
+      z-index: 0;
+      border-radius: 50%;
+      filter: blur(70px);
+      pointer-events: none;
+    }
+
+    .wjl_blob-a {
+      top: -140px;
+      right: -80px;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(48, 86, 211, 0.20), transparent 65%);
+    }
+
+    .wjl_blob-b {
+      top: 120px;
+      left: -120px;
+      width: 360px;
+      height: 360px;
+      background: radial-gradient(circle, rgba(240, 180, 60, 0.16), transparent 65%);
+    }
+
+    /* ===== 主体 ===== */
+    #wjl_main {
+      position: relative;
+      z-index: 1;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px 72px;
+    }
+
+    /* ===== Hero ===== */
+    #wjl_hero {
+      padding: 72px 0 40px;
+      animation: wjl-rise 560ms cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+    }
+
+    .wjl_eyebrow {
+      margin: 0 0 14px;
+      color: var(--wjl-accent);
+      font-family: var(--wjl-font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    #wjl_hero h1 {
+      margin: 0 0 16px;
+      font-size: clamp(40px, 6vw, 58px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.08;
+    }
+
+    .wjl_lede {
+      max-width: 560px;
+      margin: 0 0 26px;
+      color: var(--wjl-ink-soft);
+      font-size: 16px;
+    }
+
+    .wjl_lede code {
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--wjl-accent-soft);
+      color: var(--wjl-accent);
+      font-family: var(--wjl-font-mono);
+      font-size: 13px;
+    }
+
+    .wjl_chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .wjl_chip {
+      padding: 6px 14px;
+      border: 1px solid var(--wjl-line);
+      border-radius: 999px;
+      background: var(--wjl-card);
+      color: var(--wjl-ink-soft);
+      font-family: var(--wjl-font-mono);
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ===== 区块 ===== */
+    .wjl_section {
+      animation: wjl-rise 560ms cubic-bezier(0.2, 0.7, 0.3, 1) 80ms backwards;
+    }
+
+    .wjl_section-head {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      margin: 46px 0 18px;
+    }
+
+    .wjl_section-head h2 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 750;
+      letter-spacing: -0.01em;
+    }
+
+    .wjl_count {
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: var(--wjl-accent-soft);
+      color: var(--wjl-accent);
+      font-family: var(--wjl-font-mono);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .wjl_rule {
+      flex: 1;
+      height: 1px;
+      background: var(--wjl-line);
+    }
+
+    .wjl_tag {
+      color: var(--wjl-ink-mute);
+      font-family: var(--wjl-font-mono);
+      font-size: 12px;
+    }
+
+    /* ===== 图标网格 ===== */
+    .wjl_grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(106px, 1fr));
+      gap: 12px;
+    }
+
+    .wjl_card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 8px 14px;
+      border: 1px solid var(--wjl-line);
+      border-radius: 16px;
+      background: var(--wjl-card);
+      box-shadow: 0 1px 2px rgba(35, 37, 43, 0.04);
+      cursor: default;
+      transition: transform 180ms cubic-bezier(0.2, 0.7, 0.3, 1),
+                  box-shadow 180ms ease, border-color 180ms ease;
+    }
+
+    .wjl_card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(48, 86, 211, 0.38);
+      box-shadow: 0 14px 30px -12px rgba(48, 86, 211, 0.28);
+    }
+
+    .wjl_icon {
+      font-size: 26px;
+      color: var(--wjl-ink-soft);
+      transition: color 180ms ease, transform 180ms cubic-bezier(0.2, 0.7, 0.3, 1);
+    }
+
+    .wjl_card:hover .wjl_icon {
+      color: var(--wjl-accent);
+      transform: scale(1.12);
+    }
+
+    .wjl_name {
+      max-width: 100%;
+      overflow: hidden;
+      color: var(--wjl-ink-mute);
+      font-family: var(--wjl-font-mono);
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: color 180ms ease;
+    }
+
+    .wjl_card:hover .wjl_name {
+      color: var(--wjl-ink);
+    }
+
+    /* ===== 演示区：尺寸阶梯 ===== */
+    .wjl_demo {
+      padding: 26px 28px 20px;
+      border: 1px solid var(--wjl-line);
+      border-radius: 18px;
+      background: var(--wjl-card);
+    }
+
+    .wjl_demo-caption {
+      margin: 0 0 20px;
+      color: var(--wjl-ink-mute);
+      font-size: 13px;
+    }
+
+    .wjl_ladder {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 36px;
+      border-bottom: 1px dashed var(--wjl-line);
+      padding-bottom: 18px;
+    }
+
+    .wjl_ladder figure {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+    }
+
+    .wjl_ladder figcaption {
+      color: var(--wjl-ink-mute);
+      font-family: var(--wjl-font-mono);
+      font-size: 11px;
+    }
+
+    .wjl_ladder .fa-star { font-size: 16px; color: var(--wjl-ink-soft); }
+    .wjl_ladder .fa-heart { font-size: 24px; color: var(--wjl-ink-soft); }
+    .wjl_ladder .fa-house { font-size: 36px; color: var(--wjl-ink-soft); }
+    .wjl_ladder .fa-gear { font-size: 48px; color: var(--wjl-ink-soft); }
+
+    /* ===== 演示区：色彩 ===== */
+    .wjl_palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin-top: 20px;
+    }
+
+    .wjl_palette figure {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+    }
+
+    .wjl_palette figcaption {
+      color: var(--wjl-ink-mute);
+      font-family: var(--wjl-font-mono);
+      font-size: 11px;
+    }
+
+    .wjl_c-ink { font-size: 26px; color: #23252B; }
+    .wjl_c-blue { font-size: 26px; color: #3056D3; }
+    .wjl_c-red { font-size: 26px; color: #D6455D; }
+    .wjl_c-green { font-size: 26px; color: #2E9E6B; }
+    .wjl_c-amber { font-size: 26px; color: #DD8C1C; }
+
+    /* ===== 尾注 ===== */
+    #wjl_footer {
+      margin-top: 56px;
+      padding-top: 22px;
+      border-top: 1px solid var(--wjl-line);
+      color: var(--wjl-ink-mute);
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    #wjl_footer code {
+      color: var(--wjl-ink-soft);
+      font-family: var(--wjl-font-mono);
+      font-size: 12px;
+    }
+
+    /* ===== 入场动画 ===== */
+    @keyframes wjl-rise {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header id="wjl_topbar">
+    <div class="wjl_brand">
+      <span class="wjl_brand-mark"><i class="fa-solid fa-icons"></i></span>
+      <span class="wjl_brand-text">图标馆 · Gallery<small>ICON LIBRARY · 01</small></span>
+    </div>
+    <a class="wjl_back" href="index.html">← 返回首页</a>
+  </header>
+
+  <div id="wjl_stage">
+    <span class="wjl_blob wjl_blob-a"></span>
+    <span class="wjl_blob wjl_blob-b"></span>
+
+    <main id="wjl_main">
+      <section id="wjl_hero">
+        <p class="wjl_eyebrow">Icon Font · 字体图标</p>
+        <h1>Font Awesome</h1>
+        <p class="wjl_lede">
+          以<strong>字体图标（Icon Font）</strong>方式渲染的 Font Awesome 图标集——
+          一次加载字体，处处可用 <code>&lt;i class="fa-solid fa-house"&gt;&lt;/i&gt;</code> 书写，
+          <code>font-size</code> 定大小，<code>color</code> 定颜色。
+        </p>
+        <div class="wjl_chips">
+          <span class="wjl_chip">v6.7.2</span>
+          <span class="wjl_chip">70 图标</span>
+          <span class="wjl_chip">WOFF2 本地字体</span>
+          <span class="wjl_chip">fa-solid · fa-regular · fa-brands</span>
+        </div>
+      </section>
+
+      <section class="wjl_section">
+        <div class="wjl_section-head">
+          <h2>实心图标</h2>
+          <span class="wjl_count">30</span>
+          <span class="wjl_rule"></span>
+          <span class="wjl_tag">fa-solid</span>
+        </div>
+        <div class="wjl_grid">
+          <div class="wjl_card"><i class="fa-solid fa-house wjl_icon"></i><span class="wjl_name">fa-house</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-user wjl_icon"></i><span class="wjl_name">fa-user</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-heart wjl_icon"></i><span class="wjl_name">fa-heart</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-star wjl_icon"></i><span class="wjl_name">fa-star</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-magnifying-glass wjl_icon"></i><span class="wjl_name">fa-magnifying-glass</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-gear wjl_icon"></i><span class="wjl_name">fa-gear</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-camera wjl_icon"></i><span class="wjl_name">fa-camera</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-music wjl_icon"></i><span class="wjl_name">fa-music</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-envelope wjl_icon"></i><span class="wjl_name">fa-envelope</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-phone wjl_icon"></i><span class="wjl_name">fa-phone</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-bell wjl_icon"></i><span class="wjl_name">fa-bell</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-trash wjl_icon"></i><span class="wjl_name">fa-trash</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-download wjl_icon"></i><span class="wjl_name">fa-download</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-cloud wjl_icon"></i><span class="wjl_name">fa-cloud</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-cart-shopping wjl_icon"></i><span class="wjl_name">fa-cart-shopping</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-circle-check wjl_icon"></i><span class="wjl_name">fa-circle-check</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-play wjl_icon"></i><span class="wjl_name">fa-play</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-pause wjl_icon"></i><span class="wjl_name">fa-pause</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-location-dot wjl_icon"></i><span class="wjl_name">fa-location-dot</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-comment wjl_icon"></i><span class="wjl_name">fa-comment</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-calendar wjl_icon"></i><span class="wjl_name">fa-calendar</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-clock wjl_icon"></i><span class="wjl_name">fa-clock</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-thumbs-up wjl_icon"></i><span class="wjl_name">fa-thumbs-up</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-fire wjl_icon"></i><span class="wjl_name">fa-fire</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-moon wjl_icon"></i><span class="wjl_name">fa-moon</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-sun wjl_icon"></i><span class="wjl_name">fa-sun</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-wifi wjl_icon"></i><span class="wjl_name">fa-wifi</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-lock wjl_icon"></i><span class="wjl_name">fa-lock</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-globe wjl_icon"></i><span class="wjl_name">fa-globe</span></div>
+          <div class="wjl_card"><i class="fa-solid fa-gift wjl_icon"></i><span class="wjl_name">fa-gift</span></div>
+        </div>
+      </section>
+
+      <section class="wjl_section">
+        <div class="wjl_section-head">
+          <h2>常规图标</h2>
+          <span class="wjl_count">20</span>
+          <span class="wjl_rule"></span>
+          <span class="wjl_tag">fa-regular</span>
+        </div>
+        <div class="wjl_grid">
+          <div class="wjl_card"><i class="fa-regular fa-heart wjl_icon"></i><span class="wjl_name">fa-heart</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-star wjl_icon"></i><span class="wjl_name">fa-star</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-user wjl_icon"></i><span class="wjl_name">fa-user</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-envelope wjl_icon"></i><span class="wjl_name">fa-envelope</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-bell wjl_icon"></i><span class="wjl_name">fa-bell</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-clock wjl_icon"></i><span class="wjl_name">fa-clock</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-calendar wjl_icon"></i><span class="wjl_name">fa-calendar</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-image wjl_icon"></i><span class="wjl_name">fa-image</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-bookmark wjl_icon"></i><span class="wjl_name">fa-bookmark</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-comment wjl_icon"></i><span class="wjl_name">fa-comment</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-thumbs-up wjl_icon"></i><span class="wjl_name">fa-thumbs-up</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-circle-check wjl_icon"></i><span class="wjl_name">fa-circle-check</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-face-smile wjl_icon"></i><span class="wjl_name">fa-face-smile</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-floppy-disk wjl_icon"></i><span class="wjl_name">fa-floppy-disk</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-eye wjl_icon"></i><span class="wjl_name">fa-eye</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-flag wjl_icon"></i><span class="wjl_name">fa-flag</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-folder wjl_icon"></i><span class="wjl_name">fa-folder</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-file wjl_icon"></i><span class="wjl_name">fa-file</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-square wjl_icon"></i><span class="wjl_name">fa-square</span></div>
+          <div class="wjl_card"><i class="fa-regular fa-circle wjl_icon"></i><span class="wjl_name">fa-circle</span></div>
+        </div>
+      </section>
+
+      <section class="wjl_section">
+        <div class="wjl_section-head">
+          <h2>品牌图标</h2>
+          <span class="wjl_count">20</span>
+          <span class="wjl_rule"></span>
+          <span class="wjl_tag">fa-brands</span>
+        </div>
+        <div class="wjl_grid">
+          <div class="wjl_card"><i class="fa-brands fa-github wjl_icon"></i><span class="wjl_name">fa-github</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-weixin wjl_icon"></i><span class="wjl_name">fa-weixin</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-qq wjl_icon"></i><span class="wjl_name">fa-qq</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-weibo wjl_icon"></i><span class="wjl_name">fa-weibo</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-google wjl_icon"></i><span class="wjl_name">fa-google</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-microsoft wjl_icon"></i><span class="wjl_name">fa-microsoft</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-apple wjl_icon"></i><span class="wjl_name">fa-apple</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-android wjl_icon"></i><span class="wjl_name">fa-android</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-html5 wjl_icon"></i><span class="wjl_name">fa-html5</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-css3-alt wjl_icon"></i><span class="wjl_name">fa-css3-alt</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-js wjl_icon"></i><span class="wjl_name">fa-js</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-python wjl_icon"></i><span class="wjl_name">fa-python</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-node-js wjl_icon"></i><span class="wjl_name">fa-node-js</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-react wjl_icon"></i><span class="wjl_name">fa-react</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-vuejs wjl_icon"></i><span class="wjl_name">fa-vuejs</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-figma wjl_icon"></i><span class="wjl_name">fa-figma</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-chrome wjl_icon"></i><span class="wjl_name">fa-chrome</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-firefox wjl_icon"></i><span class="wjl_name">fa-firefox</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-safari wjl_icon"></i><span class="wjl_name">fa-safari</span></div>
+          <div class="wjl_card"><i class="fa-brands fa-edge wjl_icon"></i><span class="wjl_name">fa-edge</span></div>
+        </div>
+      </section>
+
+      <section class="wjl_section">
+        <div class="wjl_section-head">
+          <h2>尺寸阶梯</h2>
+          <span class="wjl_rule"></span>
+          <span class="wjl_tag">font-size</span>
+        </div>
+        <div class="wjl_demo">
+          <p class="wjl_demo-caption">字体图标即文字，任何字号都清晰锐利。</p>
+          <div class="wjl_ladder">
+            <figure><i class="fa-solid fa-star"></i><figcaption>16px</figcaption></figure>
+            <figure><i class="fa-solid fa-heart"></i><figcaption>24px</figcaption></figure>
+            <figure><i class="fa-solid fa-house"></i><figcaption>36px</figcaption></figure>
+            <figure><i class="fa-solid fa-gear"></i><figcaption>48px</figcaption></figure>
+          </div>
+          <div class="wjl_palette">
+            <figure><i class="fa-solid fa-heart wjl_c-ink"></i><figcaption>ink</figcaption></figure>
+            <figure><i class="fa-solid fa-heart wjl_c-blue"></i><figcaption>blue</figcaption></figure>
+            <figure><i class="fa-solid fa-heart wjl_c-red"></i><figcaption>red</figcaption></figure>
+            <figure><i class="fa-solid fa-heart wjl_c-green"></i><figcaption>green</figcaption></figure>
+            <figure><i class="fa-solid fa-heart wjl_c-amber"></i><figcaption>amber</figcaption></figure>
+          </div>
+        </div>
+      </section>
+
+      <footer id="wjl_footer">
+        <span>字体图标特点：加载轻量、着色自由；多色图标支持有限。</span>
+        <span>资源本地化：<code>cdn/css/all.min.css</code> + <code>cdn/webfonts/*.woff2</code></span>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>

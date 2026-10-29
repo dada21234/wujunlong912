@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lucide 图标 · SVG 方式</title>
+  <!-- 本地化的 Lucide CDN 文件：JS 已下载到 cdn/lucide.min.js -->
+  <style>
+    /* 命名规则：本项目自定义的类名 / id / CSS 变量 / JS 变量均以 wjl_ 开头（data-lucide 为 Lucide 官方属性） */
+    :root {
+      --wjl-paper: #F6F4EE;
+      --wjl-card: #FFFFFF;
+      --wjl-ink: #23252B;
+      --wjl-ink-soft: #3A3F4B;
+      --wjl-ink-mute: #8A8F99;
+      --wjl-line: rgba(35, 37, 43, 0.10);
+      --wjl-accent: #6D4AE0;
+      --wjl-accent-soft: rgba(109, 74, 224, 0.10);
+      --wjl-font-sans: "Segoe UI", system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      --wjl-font-mono: "Cascadia Code", Consolas, "SF Mono", ui-monospace, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--wjl-paper);
+      color: var(--wjl-ink);
+      font-family: var(--wjl-font-sans);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ===== 顶部导航 ===== */
+    #wjl_topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      background: rgba(246, 244, 238, 0.82);
+      border-bottom: 1px solid var(--wjl-line);
+      backdrop-filter: blur(10px);
+    }
+
+    .wjl_brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .wjl_brand-mark {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
+      background: var(--wjl-ink);
+      color: #FFFFFF;
+    }
+
+    .wjl_brand-mark svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .wjl_brand-text {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+    }
+
+    .wjl_brand-text small {
+      display: block;
+      color: var(--wjl-ink-mute);
+      font-family: var(--wjl-font-mono);
+      font-size: 11px;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+    }
+
+    .wjl_back {
+      color: var(--wjl-ink);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 8px 18px;
+      border: 1px solid var(--wjl-line);
+      border-radius: 999px;
+      background: var(--wjl-card);
+      transition: border-color 150ms ease, color 150ms ease, transform 150ms ease;
+    }
+
+    .wjl_back:hover {
+      border-color: var(--wjl-accent);
+      color: var(--wjl-accent);
+      transform: translateY(-1px);
+    }
+
+    /* ===== 装饰性光晕 ===== */
+    #wjl_stage {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wjl_blob {
+      position: absolute;
+      z-index: 0;
+      border-radius: 50%;
+      filter: blur(70px);
+      pointer-events: none;
+    }
+
+    .wjl_blob-a {
+      top: -140px;
+      right: -80px;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(109, 74, 224, 0.20), transparent 65%);
+    }
+
+    .wjl_blob-b {
+      top: 120px;
+      left: -120px;
+      width: 360px;
+      height: 360px;
+      background: radial-gradient(circle, rgba(233, 109, 132, 0.14), transparent 65%);
+    }
+
+    /* ===== 主体 ===== */
+    #wjl_main {
+      position: relative;
+      z-index: 1;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px 72px;
+    }
+
+    /* ===== Hero ===== */
+    #wjl_hero {
+      padding: 72px 0 40px;
+      animation: wjl-rise 560ms cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+    }
+
+    .wjl_eyebrow {
+      margin: 0 0 14px;
+      color: var(--wjl-accent);
+      font-family: var(--wjl-font-mono);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+
+    #wjl_hero h1 {
+      margin: 0 0 16px;
+      font-size: clamp(40px, 6vw, 58px);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.08;
+    }
+
+    .wjl_lede {
+      max-width: 560px;
+      margin: 0 0 26px;
+      color: var(--wjl-ink-soft);
+      font-size: 16px;
+    }
+
+    .wjl_lede code {
+      padding: 2px 7px;
+      border-radius: 6px;
+      background: var(--wjl-accent-soft);
+      color: var(--wjl-accent);
+      font-family: var(--wjl-font-mono);
+      font-size: 13px;
+    }
+
+    .wjl_chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .wjl_chip {
+      padding: 6px 14px;
+      border: 1px solid var(--wjl-line);
+      border-radius: 999px;
+      background: var(--wjl-card);
+      color: var(--wjl-ink-soft);
+      font-family: var(--wjl-font-mono);
+      font-size: 12px;
+      letter-spacing: 0.02em;
+    }
+
+    /* ===== 区块 ===== */
+    .wjl_section {
+      animation: wjl-rise 560ms cubic-bezier(0.2, 0.7, 0.3, 1) 80ms backwards;
+    }
+
+    .wjl_section-head {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      margin: 46px 0 18px;
+    }
+
+    .wjl_section-head h2 {
+      margin: 0;
+      font-size: 21px;
+      font-weight: 750;
+      letter-spacing: -0.01em;
+    }
+
+    .wjl_count {
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: var(--wjl-accent-soft);
+      color: var(--wjl-accent);
+      font-family: var(--wjl-font-mono);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .wjl_rule {
+      flex: 1;
+      height: 1px;
+      background: var(--wjl-line);
+    }
+
+    .wjl_tag {
+      color: var(--wjl-ink-mute);
+      font-family: var(--wjl-font-mono);
+      font-size: 12px;
+    }
+
+    /* ===== 图标网格 ===== */
+    .wjl_grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(106px, 1fr));
+      gap: 12px;
+    }
+
+    .wjl_card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 20px 8px 14px;
+      border: 1px solid var(--wjl-line);
+      border-radius: 16px;
+      background: var(--wjl-card);
+      box-shadow: 0 1px 2px rgba(35, 37, 43, 0.04);
+      cursor: default;
+      transition: transform 180ms cubic-bezier(0.2, 0.7, 0.3, 1),
+                  box-shadow 180ms ease, border-color 180ms ease;
+    }
+
+    .wjl_card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(109, 74, 224, 0.38);
+      box-shadow: 0 14px 30px -12px rgba(109, 74, 224, 0.30);
+    }
+
+    /* 生成的 SVG 继承占位元素的 class，可用 CSS 统一控制 */
+    .wjl_card svg {
+      width: 26px;
+      height: 26px;
+      color: var(--wjl-ink-soft);
+      transition: color 180ms ease, transform 180ms cubic-bezier(0.2, 0.7, 0.3, 1);
+    }
+
+    .wjl_card:hover svg {
+      color: var(--wjl-accent);
+      transform: scale(1.12);
+    }
+
+    .wjl_name {
+      max-width: 100%;
+      overflow: hidden;
+      color: var(--wjl-ink-mute);
+      font-family: var(--wjl-font-mono);
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: color 180ms ease;
+    }
+
+    .wjl_card:hover .wjl_name {
+      color: var(--wjl-ink);
+    }
+
+    /* ===== 演示区 ===== */
+    .wjl_demo {
+      padding: 26px 28px 20px;
+      border: 1px solid var(--wjl-line);
+      border-radius: 18px;
+      background: var(--wjl-card);
+    }
+
+    .wjl_demo-caption {
+      margin: 0 0 20px;
+      color: var(--wjl-ink-mute);
+      font-size: 13px;
+    }
+
+    .wjl_ladder {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 36px;
+      border-bottom: 1px dashed var(--wjl-line);
+      padding-bottom: 18px;
+    }
+
+    .wjl_ladder figure {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+    }
+
+    .wjl_ladder figcaption {
+      color: var(--wjl-ink-mute);
+      font-family: var(--wjl-font-mono);
+      font-size: 11px;
+    }
+
+    .wjl_ladder .wjl_sw-1 svg { width: 40px; height: 40px; stroke-width: 1; color: var(--wjl-ink-soft); }
+    .wjl_ladder .wjl_sw-15 svg { width: 40px; height: 40px; stroke-width: 1.5; color: var(--wjl-ink-soft); }
+    .wjl_ladder .wjl_sw-2 svg { width: 40px; height: 40px; stroke-width: 2; color: var(--wjl-ink-soft); }
+    .wjl_ladder .wjl_sw-25 svg { width: 40px; height: 40px; stroke-width: 2.5; color: var(--wjl-ink-soft); }
+
+    .wjl_palette {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      margin-top: 20px;
+    }
+
+    .wjl_palette figure {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+    }
+
+    .wjl_palette figcaption {
+      color: var(--wjl-ink-mute);
+      font-family: var(--wjl-font-mono);
+      font-size: 11px;
+    }
+
+    .wjl_palette svg { width: 26px; height: 26px; }
+    .wjl_c-ink svg { color: #23252B; }
+    .wjl_c-violet svg { color: #6D4AE0; }
+    .wjl_c-red svg { color: #D6455D; }
+    .wjl_c-green svg { color: #2E9E6B; }
+    .wjl_c-amber svg { color: #DD8C1C; }
+
+    .wjl_sizes {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 32px;
+      margin-top: 22px;
+      border-top: 1px dashed var(--wjl-line);
+      padding-top: 20px;
+    }
+
+    .wjl_sizes figure {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 0;
+    }
+
+    .wjl_sizes figcaption {
+      color: var(--wjl-ink-mute);
+      font-family: var(--wjl-font-mono);
+      font-size: 11px;
+    }
+
+    .wjl_s-16 svg { width: 16px; height: 16px; color: var(--wjl-ink-soft); }
+    .wjl_s-28 svg { width: 28px; height: 28px; color: var(--wjl-accent); }
+    .wjl_s-44 svg { width: 44px; height: 44px; color: #D6455D; }
+    .wjl_s-60 svg { width: 60px; height: 60px; color: #DD8C1C; }
+
+    /* ===== 尾注 ===== */
+    #wjl_footer {
+      margin-top: 56px;
+      padding-top: 22px;
+      border-top: 1px solid var(--wjl-line);
+      color: var(--wjl-ink-mute);
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    #wjl_footer code {
+      color: var(--wjl-ink-soft);
+      font-family: var(--wjl-font-mono);
+      font-size: 12px;
+    }
+
+    /* ===== 入场动画 ===== */
+    @keyframes wjl-rise {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header id="wjl_topbar">
+    <div class="wjl_brand">
+      <span class="wjl_brand-mark"><i data-lucide="feather"></i></span>
+      <span class="wjl_brand-text">图标馆 · Gallery<small>ICON LIBRARY · 02</small></span>
+    </div>
+    <a class="wjl_back" href="index.html">← 返回首页</a>
+  </header>
+
+  <div id="wjl_stage">
+    <span class="wjl_blob wjl_blob-a"></span>
+    <span class="wjl_blob wjl_blob-b"></span>
+
+    <main id="wjl_main">
+      <section id="wjl_hero">
+        <p class="wjl_eyebrow">Inline SVG · 矢量描边</p>
+        <h1>Lucide Icons</h1>
+        <p class="wjl_lede">
+          以<strong>内联 SVG</strong>方式渲染的 Lucide 图标集——
+          用 <code>&lt;i data-lucide="house"&gt;&lt;/i&gt;</code> 占位，
+          调用 <code>lucide.createIcons()</code> 替换为矢量图形，描边、尺寸、颜色皆可精雕。
+        </p>
+        <div class="wjl_chips">
+          <span class="wjl_chip">v1.61.0</span>
+          <span class="wjl_chip">36 图标</span>
+          <span class="wjl_chip">本地 UMD</span>
+          <span class="wjl_chip">stroke-width 可调</span>
+        </div>
+      </section>
+
+      <section class="wjl_section">
+        <div class="wjl_section-head">
+          <h2>基础图标</h2>
+          <span class="wjl_count">36</span>
+          <span class="wjl_rule"></span>
+          <span class="wjl_tag">data-lucide</span>
+        </div>
+        <div class="wjl_grid">
+          <div class="wjl_card"><i data-lucide="house"></i><span class="wjl_name">house</span></div>
+          <div class="wjl_card"><i data-lucide="user"></i><span class="wjl_name">user</span></div>
+          <div class="wjl_card"><i data-lucide="heart"></i><span class="wjl_name">heart</span></div>
+          <div class="wjl_card"><i data-lucide="star"></i><span class="wjl_name">star</span></div>
+          <div class="wjl_card"><i data-lucide="search"></i><span class="wjl_name">search</span></div>
+          <div class="wjl_card"><i data-lucide="settings"></i><span class="wjl_name">settings</span></div>
+          <div class="wjl_card"><i data-lucide="camera"></i><span class="wjl_name">camera</span></div>
+          <div class="wjl_card"><i data-lucide="music"></i><span class="wjl_name">music</span></div>
+          <div class="wjl_card"><i data-lucide="mail"></i><span class="wjl_name">mail</span></div>
+          <div class="wjl_card"><i data-lucide="phone"></i><span class="wjl_name">phone</span></div>
+          <div class="wjl_card"><i data-lucide="bell"></i><span class="wjl_name">bell</span></div>
+          <div class="wjl_card"><i data-lucide="trash-2"></i><span class="wjl_name">trash-2</span></div>
+          <div class="wjl_card"><i data-lucide="download"></i><span class="wjl_name">download</span></div>
+          <div class="wjl_card"><i data-lucide="cloud"></i><span class="wjl_name">cloud</span></div>
+          <div class="wjl_card"><i data-lucide="shopping-cart"></i><span class="wjl_name">shopping-cart</span></div>
+          <div class="wjl_card"><i data-lucide="check"></i><span class="wjl_name">check</span></div>
+          <div class="wjl_card"><i data-lucide="x"></i><span class="wjl_name">x</span></div>
+          <div class="wjl_card"><i data-lucide="play"></i><span class="wjl_name">play</span></div>
+          <div class="wjl_card"><i data-lucide="pause"></i><span class="wjl_name">pause</span></div>
+          <div class="wjl_card"><i data-lucide="map-pin"></i><span class="wjl_name">map-pin</span></div>
+          <div class="wjl_card"><i data-lucide="message-circle"></i><span class="wjl_name">message-circle</span></div>
+          <div class="wjl_card"><i data-lucide="calendar"></i><span class="wjl_name">calendar</span></div>
+          <div class="wjl_card"><i data-lucide="clock"></i><span class="wjl_name">clock</span></div>
+          <div class="wjl_card"><i data-lucide="image"></i><span class="wjl_name">image</span></div>
+          <div class="wjl_card"><i data-lucide="bookmark"></i><span class="wjl_name">bookmark</span></div>
+          <div class="wjl_card"><i data-lucide="share-2"></i><span class="wjl_name">share-2</span></div>
+          <div class="wjl_card"><i data-lucide="thumbs-up"></i><span class="wjl_name">thumbs-up</span></div>
+          <div class="wjl_card"><i data-lucide="flame"></i><span class="wjl_name">flame</span></div>
+          <div class="wjl_card"><i data-lucide="moon"></i><span class="wjl_name">moon</span></div>
+          <div class="wjl_card"><i data-lucide="sun"></i><span class="wjl_name">sun</span></div>
+          <div class="wjl_card"><i data-lucide="wifi"></i><span class="wjl_name">wifi</span></div>
+          <div class="wjl_card"><i data-lucide="lock"></i><span class="wjl_name">lock</span></div>
+          <div class="wjl_card"><i data-lucide="globe"></i><span class="wjl_name">globe</span></div>
+          <div class="wjl_card"><i data-lucide="gift"></i><span class="wjl_name">gift</span></div>
+          <div class="wjl_card"><i data-lucide="zap"></i><span class="wjl_name">zap</span></div>
+          <div class="wjl_card"><i data-lucide="coffee"></i><span class="wjl_name">coffee</span></div>
+        </div>
+      </section>
+
+      <section class="wjl_section">
+        <div class="wjl_section-head">
+          <h2>线条粗细</h2>
+          <span class="wjl_rule"></span>
+          <span class="wjl_tag">stroke-width</span>
+        </div>
+        <div class="wjl_demo">
+          <p class="wjl_demo-caption">SVG 矢量描边可精确到 0.5 级，这是字体图标做不到的。</p>
+          <div class="wjl_ladder">
+            <figure><span class="wjl_sw-1"><i data-lucide="heart"></i></span><figcaption>1</figcaption></figure>
+            <figure><span class="wjl_sw-15"><i data-lucide="heart"></i></span><figcaption>1.5</figcaption></figure>
+            <figure><span class="wjl_sw-2"><i data-lucide="heart"></i></span><figcaption>2 · 默认</figcaption></figure>
+            <figure><span class="wjl_sw-25"><i data-lucide="heart"></i></span><figcaption>2.5</figcaption></figure>
+          </div>
+          <div class="wjl_palette">
+            <figure><span class="wjl_c-ink"><i data-lucide="star"></i></span><figcaption>ink</figcaption></figure>
+            <figure><span class="wjl_c-violet"><i data-lucide="star"></i></span><figcaption>violet</figcaption></figure>
+            <figure><span class="wjl_c-red"><i data-lucide="star"></i></span><figcaption>red</figcaption></figure>
+            <figure><span class="wjl_c-green"><i data-lucide="star"></i></span><figcaption>green</figcaption></figure>
+            <figure><span class="wjl_c-amber"><i data-lucide="star"></i></span><figcaption>amber</figcaption></figure>
+          </div>
+          <div class="wjl_sizes">
+            <figure><span class="wjl_s-16"><i data-lucide="settings"></i></span><figcaption>16px</figcaption></figure>
+            <figure><span class="wjl_s-28"><i data-lucide="settings"></i></span><figcaption>28px</figcaption></figure>
+            <figure><span class="wjl_s-44"><i data-lucide="settings"></i></span><figcaption>44px</figcaption></figure>
+            <figure><span class="wjl_s-60"><i data-lucide="settings"></i></span><figcaption>60px</figcaption></figure>
+          </div>
+        </div>
+      </section>
+
+      <footer id="wjl_footer">
+        <span>SVG 图标特点：矢量无损缩放、描边可调、支持多色与渐变。</span>
+        <span>资源本地化：<code>cdn/lucide.min.js</code></span>
+      </footer>
+    </main>
+  </div>
+
+  <script src="cdn/lucide.min.js"></script>
+  <script>
+    // 命名规则：JS 变量以 wjl_ 开头
+    const wjl_defaultAttrs = { width: 24, height: 24 };
+    lucide.createIcons({ attrs: wjl_defaultAttrs });
+  </script>
+</body>
+</html>

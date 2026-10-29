@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>抓小球小游戏</title>
+  <style>
+    :root {
+      --bg: #FFF9C4;
+      --ball: #2196F3;
+      --ball-dark: #1976D2;
+      --text: #333333;
+      --danger: #E53935;
+      --panel: rgba(255, 255, 255, 0.92);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      user-select: none;
+    }
+
+    #topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 20;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(255, 255, 255, 0.68);
+      box-shadow: 0 2px 12px rgba(51, 51, 51, 0.12);
+      backdrop-filter: blur(4px);
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    #gameArea {
+      position: fixed;
+      inset: 56px 0 0 0;
+      z-index: 1;
+      overflow: hidden;
+    }
+
+    .panel {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      z-index: 10;
+      min-width: 280px;
+      padding: 30px 36px;
+      border-radius: 18px;
+      background: var(--panel);
+      box-shadow: 0 18px 48px rgba(51, 51, 51, 0.2);
+      text-align: center;
+      transform: translate(-50%, -50%);
+      animation: panelIn 160ms ease-out;
+    }
+
+    .panel h1,
+    .panel h2 {
+      margin: 0 0 12px;
+    }
+
+    .panel p {
+      margin: 0 0 20px;
+      line-height: 1.6;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 28px;
+      background: var(--ball);
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 8px 18px rgba(25, 118, 210, 0.28);
+      transition: transform 120ms ease, background 120ms ease;
+    }
+
+    button:hover {
+      background: var(--ball-dark);
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.98);
+    }
+
+    .ball {
+      position: absolute;
+      z-index: 2;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #64B5F6, var(--ball) 62%, var(--ball-dark));
+      box-shadow: 0 8px 18px rgba(25, 118, 210, 0.35);
+      cursor: pointer;
+      transform: translate(-50%, -50%) scale(1);
+      transition: transform 80ms ease;
+      animation: spawnIn 120ms ease-out;
+    }
+
+    .ball:hover {
+      transform: translate(-50%, -50%) scale(1.05);
+    }
+
+    .ball.hit {
+      animation: hitOut 120ms ease-in forwards;
+    }
+
+    #gameArea.ended .ball {
+      pointer-events: none;
+      cursor: default;
+    }
+
+    .score-float {
+      position: absolute;
+      z-index: 5;
+      color: #2E7D32;
+      font-size: 24px;
+      font-weight: 900;
+      pointer-events: none;
+      text-shadow: 0 2px 8px rgba(255, 255, 255, 0.85);
+      transform: translate(-50%, -50%);
+      animation: floatUp 600ms ease-out forwards;
+    }
+
+    @keyframes spawnIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.4);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    @keyframes hitOut {
+      from {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+      to {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0);
+      }
+    }
+
+    @keyframes floatUp {
+      from {
+        opacity: 1;
+        transform: translate(-50%, -50%) translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translate(-50%, -50%) translateY(-42px);
+      }
+    }
+
+    @keyframes panelIn {
+      from {
+        opacity: 0;
+        transform: translate(-50%, -48%) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <header id="topbar">
+    <div>分数 <span id="scoreValue">0</span></div>
+    <div id="timeValue">剩余 02:00</div>
+  </header>
+
+  <main id="gameArea" aria-label="抓小球游戏区域">
+    <section id="startPanel" class="panel">
+      <h1>抓小球</h1>
+      <p>点击蓝色小球 +2 分，点到空白 -1 分。</p>
+      <button id="startButton" type="button">开始游戏</button>
+    </section>
+
+    <section id="endPanel" class="panel hidden">
+      <h2>时间到</h2>
+      <p>最终得分：<strong id="finalScore">0</strong></p>
+      <button id="restartButton" type="button">重新开始</button>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const TOTAL_TIME = 120;
+      const BALL_SIZE = 64;
+      const BALL_RADIUS = BALL_SIZE / 2;
+      const MIN_CENTER_DISTANCE = BALL_SIZE + 24;
+      const MAX_SPAWN_ATTEMPTS = 50;
+
+      const gameArea = document.getElementById('gameArea');
+      const scoreValue = document.getElementById('scoreValue');
+      const timeValue = document.getElementById('timeValue');
+      const startPanel = document.getElementById('startPanel');
+      const startButton = document.getElementById('startButton');
+      const endPanel = document.getElementById('endPanel');
+      const finalScore = document.getElementById('finalScore');
+      const restartButton = document.getElementById('restartButton');
+
+      let state = 'idle';
+      let score = 0;
+      let remaining = TOTAL_TIME;
+      let countdownTimer = null;
+      let audioContext = null;
+      const balls = new Set();
+
+      function updateScore() {
+        scoreValue.textContent = String(score);
+      }
+
+      function formatTime(seconds) {
+        const safeSeconds = Math.max(0, seconds);
+        const mm = String(Math.floor(safeSeconds / 60)).padStart(2, '0');
+        const ss = String(safeSeconds % 60).padStart(2, '0');
+        return `剩余 ${mm}:${ss}`;
+      }
+
+      function updateTime() {
+        timeValue.textContent = formatTime(remaining);
+      }
+
+      function desiredBallCount() {
+        const elapsed = TOTAL_TIME - remaining;
+        if (elapsed < 30) return 1;
+        if (elapsed < 60) return 2;
+        return 3;
+      }
+
+      function randomBetween(min, max) {
+        return Math.random() * (max - min) + min;
+      }
+
+      function getSpawnBounds() {
+        const inset = 8;
+        const minX = BALL_RADIUS + inset;
+        const minY = BALL_RADIUS + inset;
+        const maxX = Math.max(minX, gameArea.clientWidth - BALL_RADIUS - inset);
+        const maxY = Math.max(minY, gameArea.clientHeight - BALL_RADIUS - inset);
+        return { minX, minY, maxX, maxY };
+      }
+
+      function isFarEnough(x, y) {
+        for (const ball of balls) {
+          const dx = x - Number(ball.dataset.x);
+          const dy = y - Number(ball.dataset.y);
+          if (Math.hypot(dx, dy) < MIN_CENTER_DISTANCE) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      function spawnBall() {
+        if (state !== 'playing') return;
+
+        const bounds = getSpawnBounds();
+        let x = (bounds.minX + bounds.maxX) / 2;
+        let y = (bounds.minY + bounds.maxY) / 2;
+
+        for (let attempt = 0; attempt < MAX_SPAWN_ATTEMPTS; attempt += 1) {
+          x = randomBetween(bounds.minX, bounds.maxX);
+          y = randomBetween(bounds.minY, bounds.maxY);
+          if (isFarEnough(x, y)) {
+            break;
+          }
+        }
+
+        const ball = document.createElement('div');
+        ball.className = 'ball spawn';
+        ball.dataset.x = String(x);
+        ball.dataset.y = String(y);
+        ball.style.left = `${x}px`;
+        ball.style.top = `${y}px`;
+        ball.addEventListener('animationend', () => {
+          ball.classList.remove('spawn');
+        }, { once: true });
+
+        gameArea.appendChild(ball);
+        balls.add(ball);
+      }
+
+      function ensureBallCount() {
+        if (state !== 'playing') return;
+
+        const target = desiredBallCount();
+        let guard = 0;
+        while (balls.size < target && guard < 10) {
+          spawnBall();
+          guard += 1;
+        }
+      }
+
+      function clearBalls() {
+        balls.forEach((ball) => ball.remove());
+        balls.clear();
+        gameArea.querySelectorAll('.score-float').forEach((float) => float.remove());
+      }
+
+      function showScoreFloat(clientX, clientY) {
+        const rect = gameArea.getBoundingClientRect();
+        const float = document.createElement('span');
+        float.className = 'score-float';
+        float.textContent = '+2';
+        float.style.left = `${clientX - rect.left}px`;
+        float.style.top = `${clientY - rect.top}px`;
+        float.addEventListener('animationend', () => float.remove(), { once: true });
+        gameArea.appendChild(float);
+      }
+
+      function ensureAudio() {
+        const AudioCtor = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtor) return;
+
+        if (!audioContext) {
+          audioContext = new AudioCtor();
+        }
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+      }
+
+      function playTone(frequency, duration, delay = 0, type = 'sine', volume = 0.08) {
+        if (!audioContext) return;
+        if (audioContext.state === 'suspended') {
+          audioContext.resume();
+        }
+
+        const startAt = audioContext.currentTime + delay;
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        oscillator.type = type;
+        oscillator.frequency.setValueAtTime(frequency, startAt);
+        gain.gain.setValueAtTime(0.0001, startAt);
+        gain.gain.exponentialRampToValueAtTime(volume, startAt + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, startAt + duration);
+
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+        oscillator.start(startAt);
+        oscillator.stop(startAt + duration + 0.03);
+      }
+
+      function handleHit(ball, clientX, clientY) {
+        if (ball.classList.contains('hit')) return;
+
+        score += 2;
+        updateScore();
+        showScoreFloat(clientX, clientY);
+        playTone(880, 0.08);
+
+        ball.classList.add('hit');
+        ball.addEventListener('animationend', () => {
+          balls.delete(ball);
+          ball.remove();
+          ensureBallCount();
+        }, { once: true });
+      }
+
+      function handleBlankClick() {
+        score = Math.max(0, score - 1);
+        updateScore();
+        playTone(220, 0.12, 0, 'triangle', 0.07);
+      }
+
+      function tick() {
+        if (state !== 'playing') return;
+
+        remaining -= 1;
+        if (remaining <= 0) {
+          remaining = 0;
+          updateTime();
+          endGame();
+          return;
+        }
+
+        updateTime();
+        ensureBallCount();
+      }
+
+      function startGame() {
+        ensureAudio();
+        state = 'playing';
+        score = 0;
+        remaining = TOTAL_TIME;
+
+        if (countdownTimer) {
+          clearInterval(countdownTimer);
+          countdownTimer = null;
+        }
+
+        clearBalls();
+        gameArea.classList.remove('ended');
+        startPanel.classList.add('hidden');
+        endPanel.classList.add('hidden');
+        updateScore();
+        updateTime();
+        ensureBallCount();
+        countdownTimer = setInterval(tick, 1000);
+      }
+
+      function endGame() {
+        if (state !== 'playing') return;
+
+        state = 'ended';
+        if (countdownTimer) {
+          clearInterval(countdownTimer);
+          countdownTimer = null;
+        }
+
+        gameArea.classList.add('ended');
+        finalScore.textContent = String(score);
+        endPanel.classList.remove('hidden');
+        playTone(523, 0.12);
+        playTone(392, 0.18, 0.14);
+      }
+
+      function clampBallsToBounds() {
+        if (state !== 'playing') return;
+
+        const bounds = getSpawnBounds();
+        balls.forEach((ball) => {
+          const x = Number(ball.dataset.x);
+          const y = Number(ball.dataset.y);
+          const clampedX = Math.min(Math.max(x, bounds.minX), bounds.maxX);
+          const clampedY = Math.min(Math.max(y, bounds.minY), bounds.maxY);
+
+          if (clampedX !== x || clampedY !== y) {
+            ball.dataset.x = String(clampedX);
+            ball.dataset.y = String(clampedY);
+            ball.style.left = `${clampedX}px`;
+            ball.style.top = `${clampedY}px`;
+          }
+        });
+      }
+
+      gameArea.addEventListener('click', (event) => {
+        if (state !== 'playing') return;
+        if (event.target.closest('button') || event.target.closest('.panel')) return;
+
+        const ball = event.target.closest('.ball');
+        if (ball && balls.has(ball)) {
+          handleHit(ball, event.clientX, event.clientY);
+          return;
+        }
+
+        handleBlankClick();
+      });
+
+      startButton.addEventListener('click', startGame);
+      restartButton.addEventListener('click', startGame);
+      window.addEventListener('resize', clampBallsToBounds);
+
+      updateScore();
+      updateTime();
+    })();
+  </script>
+</body>
+</html>
