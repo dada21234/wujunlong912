@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  页面名称：新闻选项卡页（wjl_news_tabs.html）
+  作者：吴君龙
+  建立时间：2026-11-02
+  使用模型：GLM-5.3-Flash
+  功能简介：展示"国内新闻 / 国际新闻 / 省内新闻 / 最热新闻"
+            四个选项卡，国内新闻为默认选中项；JS 逻辑独立放在
+            js/wjl_tabs.js 中外部引用，选项卡组件可复用
+  ============================================================
+-->
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>新闻选项卡 · 吴君龙</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: "Microsoft YaHei", sans-serif; background: #f0f2f5; padding: 30px 16px; }
+    .wjl-container { max-width: 720px; margin: 0 auto; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 12px rgba(0, 0, 0, .08); }
+
+    /* 页头 */
+    .wjl-header { background: #5b7cfa; color: #fff; padding: 18px 24px; }
+    .wjl-header h1 { font-size: 20px; }
+
+    /* 选项卡按钮区 */
+    .wjl-tab-bar { display: flex; border-bottom: 2px solid #e8eaf2; background: #fafbff; }
+    .wjl-tab-btn { flex: 1; padding: 12px 0; border: none; background: none; font-size: 15px; color: #666; cursor: pointer; position: relative; transition: color .2s; }
+    .wjl-tab-btn:hover { color: #5b7cfa; }
+    .wjl-tab-btn.wjl_active { color: #5b7cfa; font-weight: 700; }
+    .wjl-tab-btn.wjl_active::after { content: ""; position: absolute; left: 22%; right: 22%; bottom: -2px; height: 3px; background: #5b7cfa; border-radius: 2px; }
+
+    /* 内容面板区：默认隐藏，选中才显示 */
+    .wjl-tab-panel { display: none; padding: 18px 24px; }
+    .wjl-tab-panel.wjl_active { display: block; }
+
+    /* 新闻列表 */
+    .wjl-news-list { list-style: none; }
+    .wjl-news-list li { padding: 10px 0; border-bottom: 1px dashed #eee; font-size: 14px; color: #333; }
+    .wjl-news-list li:last-child { border-bottom: none; }
+    .wjl-news-list li:hover { color: #5b7cfa; cursor: pointer; }
+    .wjl-date { float: right; color: #999; font-size: 12px; }
+
+    /* 返回首页链接 */
+    .wjl-back { display: block; width: max-content; margin: 20px auto; color: #5b7cfa; text-decoration: none; font-size: 14px; }
+    .wjl-back:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <div class="wjl-container">
+    <div class="wjl-header"><h1>新闻中心</h1></div>
+
+    <!-- 选项卡组：data-wjl-tabs 标记一组选项卡（JS 据此初始化，可复用） -->
+    <div class="wjl-tabs" data-wjl-tabs>
+      <!-- 选项卡按钮区：国内新闻为默认选中（wjl_active） -->
+      <div class="wjl-tab-bar" role="tablist">
+        <button class="wjl-tab-btn wjl_active" data-wjl-tab>国内新闻</button>
+        <button class="wjl-tab-btn" data-wjl-tab>国际新闻</button>
+        <button class="wjl-tab-btn" data-wjl-tab>省内新闻</button>
+        <button class="wjl-tab-btn" data-wjl-tab>最热新闻</button>
+      </div>
+
+      <!-- 内容面板区：与按钮按顺序一一对应 -->
+      <div class="wjl-tab-panels">
+        <div class="wjl-tab-panel wjl_active" data-wjl-panel>
+          <ul class="wjl-news-list">
+            <li>全国秋粮收购工作全面展开 市场运行平稳<span class="wjl-date">11-01</span></li>
+            <li>新一轮减税降费政策落地 助力中小企业发展<span class="wjl-date">10-31</span></li>
+            <li>全国铁路今起实行新列车运行图<span class="wjl-date">10-30</span></li>
+          </ul>
+        </div>
+        <div class="wjl-tab-panel" data-wjl-panel>
+          <ul class="wjl-news-list">
+            <li>联合国气候变化大会就新协议达成共识<span class="wjl-date">11-01</span></li>
+            <li>多国代表签署数字经济合作框架协议<span class="wjl-date">10-31</span></li>
+            <li>国际航天合作项目取得新突破<span class="wjl-date">10-29</span></li>
+          </ul>
+        </div>
+        <div class="wjl-tab-panel" data-wjl-panel>
+          <ul class="wjl-news-list">
+            <li>我省启动冬季文化旅游消费季活动<span class="wjl-date">11-01</span></li>
+            <li>全省高速公路服务区完成智能化升级<span class="wjl-date">10-30</span></li>
+            <li>省运动会筹备工作进入冲刺阶段<span class="wjl-date">10-28</span></li>
+          </ul>
+        </div>
+        <div class="wjl-tab-panel" data-wjl-panel>
+          <ul class="wjl-news-list">
+            <li>人工智能应用新规范正式发布<span class="wjl-date">11-01</span></li>
+            <li>全国多地迎来今冬第一场雪<span class="wjl-date">10-31</span></li>
+            <li>国产大飞机新增多条商业航线<span class="wjl-date">10-30</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <a class="wjl-back" href="index.html">返回首页</a>
+
+  <!-- 外部引用 JS：独立放在 js 文件夹中 -->
+  <script src="js/wjl_tabs.js"></script>
+</body>
+</html>
