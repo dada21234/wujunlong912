@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>任务一验证页 · 两轮提示词对比（第 1 轮 vs 第 2 轮）</title>
+<!--
+  作者：吴君龙
+  建立时间：2026-11-09
+  使用模型：DeepSeek-V4.1-Flash
+  功能名称及简介：任务一（提示词工程师）双轮对比验证页——
+    左栏放第 1 轮提示词让 AI 生成的初版配置（有遗漏），右栏放第 2 轮
+    按验收项修正后的配置，两栏在同一页面并排运行，并自动读取 Swiper
+    的实时参数与实测翻页间隔，用于截图对比取证。
+  说明：Swiper 使用本项目内已下载的本地文件（swiper-images/swiper/），断网也能跑。
+-->
+<link rel="stylesheet" href="swiper-images/swiper/swiper-bundle.min.css">
+<script src="swiper-images/swiper/swiper-bundle.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:"Microsoft YaHei","PingFang SC",system-ui,sans-serif;background:#f6f8fc;color:#1f2937}
+  .wjl_page{max-width:1180px;margin:0 auto;padding:36px 20px 60px}
+
+  /* 头部 */
+  .wjl_head{background:linear-gradient(135deg,#0f2b5b,#1d5bbf);border-radius:18px;padding:30px 32px;color:#fff;box-shadow:0 12px 28px rgba(15,43,91,.28);margin-bottom:20px}
+  .wjl_badge{display:inline-block;font-size:12.5px;letter-spacing:2px;padding:5px 14px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.3);margin-bottom:12px}
+  .wjl_head h1{font-size:25px;letter-spacing:1px}
+  .wjl_head p{margin-top:10px;font-size:14px;line-height:2;color:#d9e3f5}
+  .wjl_head p b{color:#ffd166}
+
+  /* 需求对照表 */
+  .wjl_table{width:100%;border-collapse:collapse;background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 4px 14px rgba(31,41,55,.06);margin-bottom:26px;font-size:13.5px}
+  .wjl_table th{background:#0f2b5b;color:#fff;font-weight:normal;padding:11px 14px;text-align:left;letter-spacing:.5px}
+  .wjl_table td{padding:10px 14px;border-top:1px solid #eef1f8;line-height:1.9;vertical-align:top}
+  .wjl_table tr:nth-child(even) td{background:#fafbff}
+  .wjl_table .wjl_bad{color:#c2410c}
+  .wjl_table .wjl_good{color:#15803d}
+
+  /* 两栏 */
+  .wjl_cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media (max-width:960px){.wjl_cols{grid-template-columns:1fr}}
+
+  .wjl_card{background:#fff;border-radius:16px;box-shadow:0 4px 14px rgba(31,41,55,.06);overflow:hidden;display:flex;flex-direction:column}
+  .wjl_cardTop{padding:16px 20px 14px;border-bottom:1px solid #eef1f8}
+  .wjl_cardTop h2{font-size:17px;color:#111827;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .wjl_tag{font-size:12px;font-weight:bold;border-radius:999px;padding:3px 11px}
+  .wjl_tag.wjl_r1{background:#fff1e6;color:#c2410c;border:1px solid #fdba74}
+  .wjl_tag.wjl_r2{background:#ecfdf5;color:#15803d;border:1px solid #6ee7b7}
+  .wjl_cardTop p{margin-top:8px;font-size:12.8px;color:#6b7280;line-height:1.9}
+
+  /* 代码块 */
+  .wjl_code{background:#0f172a;color:#e2e8f0;padding:14px 16px;font-family:Consolas,"Courier New",monospace;font-size:12.3px;line-height:1.85;white-space:pre;overflow-x:auto}
+  .wjl_code .wjl_cmtG{color:#6ee7b7}
+  .wjl_code .wjl_cmtR{color:#fca5a5}
+  .wjl_code .wjl_pg{color:#93c5fd}
+
+  /* 演示区 */
+  .wjl_demo{padding:16px 20px 6px}
+  .wjl_chipLine{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;font-size:12.5px}
+  .wjl_chip{background:#eef2ff;color:#1d4ed8;border:1px solid #c7d8f8;border-radius:999px;padding:5px 13px}
+  .wjl_chip b{color:#0f2b5b}
+  .wjl_swiperWrap{max-width:100%}
+  .wjl_swiperWrap .swiper{border-radius:14px;box-shadow:0 8px 22px rgba(15,43,91,.16)}
+  .wjl_swiperWrap .swiper-slide{position:relative;height:230px}
+  .wjl_swiperWrap .swiper-slide img{width:100%;height:100%;object-fit:cover;display:block}
+  .wjl_cap{position:absolute;left:0;right:0;bottom:0;padding:26px 16px 12px;color:#fff;background:linear-gradient(transparent,rgba(5,15,35,.82))}
+  .wjl_cap h3{font-size:15.5px;letter-spacing:1px}
+  .wjl_cap p{font-size:12px;color:#dbe6f8;margin-top:3px}
+  .wjl_swiperWrap .swiper-pagination-bullet{background:#0f2b5b;opacity:.35}
+  .wjl_swiperWrap .swiper-pagination-bullet-active{background:#e8890c;opacity:1;width:20px;border-radius:6px}
+
+  /* 实测清单 */
+  .wjl_audit{padding:6px 20px 20px}
+  .wjl_audit h3{font-size:13px;color:#0f2b5b;margin:10px 0 8px}
+  .wjl_audit ul{list-style:none}
+  .wjl_audit li{font-size:12.8px;line-height:2.1;color:#374151;display:flex;gap:8px}
+  .wjl_audit li i{font-style:normal;flex:none;width:16px}
+  .wjl_audit li.wjl_ok i{color:#15803d}
+  .wjl_audit li.wjl_no i{color:#dc2626}
+  .wjl_audit li b{color:#0f2b5b}
+  .wjl_audit li span{color:#9ca3af}
+
+  /* 底部 */
+  .wjl_back{text-align:center;margin-top:26px}
+  .wjl_back a{display:inline-block;text-decoration:none;color:#0f2b5b;font-size:14px;font-weight:bold;background:#fff;border:1px solid #dbe4ff;border-radius:999px;padding:9px 24px;margin:0 6px;transition:transform .2s,box-shadow .2s}
+  .wjl_back a:hover{transform:translateY(-2px);box-shadow:0 8px 18px rgba(15,43,91,.15)}
+  .wjl_footer{text-align:center;margin-top:30px;color:#9ca3af;font-size:12.5px;line-height:2}
+</style>
+</head>
+<body>
+<div class="wjl_page">
+
+  <div class="wjl_head">
+    <span class="wjl_badge">任 务 一 · 两 轮 提 示 词 对 比 验 证</span>
+    <h1>同一句需求，两版 AI 回答 · 同屏对照</h1>
+    <p>左栏是第 1 轮提示词得到的初版代码，右栏是第 2 轮补全验收项后的修正版。
+       两栏同时运行，下方清单会<b>自动读取 Swiper 的真实参数和实测翻页间隔</b>，
+       截图即可证明"第一版漏了什么、第二版怎么补上的"。</p>
+  </div>
+
+  <table class="wjl_table">
+    <tr><th style="width:22%">需求</th><th style="width:39%">第 1 轮 AI 的做法</th><th style="width:39%">第 2 轮补齐后</th></tr>
+    <tr>
+      <td>① 无缝循环</td>
+      <td class="wjl_good">loop: true（这一项本来就对）</td>
+      <td class="wjl_good">loop: true</td>
+    </tr>
+    <tr>
+      <td>② 3.2 秒自动翻页</td>
+      <td class="wjl_bad">autoplay: true → 吃默认值 3000ms</td>
+      <td class="wjl_good">autoplay: { delay: 3200 }</td>
+    </tr>
+    <tr>
+      <td>② 手动操作后不停止</td>
+      <td class="wjl_bad">没写 disableOnInteraction → 默认 true，拖动一次就停</td>
+      <td class="wjl_good">disableOnInteraction: false</td>
+    </tr>
+    <tr>
+      <td>③ 圆点可点击</td>
+      <td class="wjl_bad">只给了 el，缺 clickable → 圆点能显示但不能点</td>
+      <td class="wjl_good">pagination: { el: '#wyPag4', clickable: true }</td>
+    </tr>
+    <tr>
+      <td>④ 初始 cube 效果</td>
+      <td class="wjl_bad">只写 effect: 'cube'，没配 cubeEffect → 无阴影、立体感弱</td>
+      <td class="wjl_good">effect: 'cube' + cubeEffect 四个参数</td>
+    </tr>
+  </table>
+
+  <div class="wjl_cols">
+
+    <!-- ── 第 1 轮 ── -->
+    <div class="wjl_card">
+      <div class="wjl_cardTop">
+        <h2>第 1 轮 · 初版回答 <span class="wjl_tag wjl_r1">有遗漏</span></h2>
+        <p>提示词只说"能循环、自动翻页、有圆点、cube 效果"，AI 大量依赖默认值。</p>
+      </div>
+      <div class="wjl_code">new Swiper('#wySw4', {
+  loop: true,                     <span class="wjl_cmtG">// ① 对</span>
+  autoplay: true,                 <span class="wjl_cmtR">// ❌ 默认 3000ms，不是 3200</span>
+                                  <span class="wjl_cmtR">// ❌ 默认拖动即停</span>
+  effect: 'cube',                 <span class="wjl_cmtR">// ❌ 没配 cubeEffect</span>
+  pagination: { el: '#wyPag4' }   <span class="wjl_cmtR">// ❌ 缺 clickable</span>
+});</div>
+      <div class="wjl_demo">
+        <div class="wjl_chipLine">
+          <span class="wjl_chip">当前：第 <b id="wjl_idxA">1</b> / 5 张 · <span id="wjl_nameA">天宫空间站</span></span>
+          <span class="wjl_chip">实测 delay（已扣切换动画）：<b id="wjl_rateA">采样中…</b></span>
+        </div>
+        <div class="wjl_swiperWrap">
+          <div class="swiper" id="wjl_swA">
+            <div class="swiper-wrapper">
+              <div class="swiper-slide"><img src="swiper-imgs/tiangong_1.jpg" alt="天宫空间站"><div class="wjl_cap"><h3>天宫空间站</h3><p>第 1 轮：初版配置</p></div></div>
+              <div class="swiper-slide"><img src="swiper-imgs/fuxing_1.jpg" alt="复兴号动车组"><div class="wjl_cap"><h3>复兴号动车组</h3><p>看看圆点能不能点</p></div></div>
+              <div class="swiper-slide"><img src="swiper-imgs/c919_1.jpg" alt="C919大飞机"><div class="wjl_cap"><h3>C919 大飞机</h3><p>试试按住拖动</p></div></div>
+              <div class="swiper-slide"><img src="swiper-imgs/fendouzhe_1.jpg" alt="奋斗者号"><div class="wjl_cap"><h3>奋斗者号</h3><p>拖动松手后会停下来</p></div></div>
+              <div class="swiper-slide"><img src="swiper-imgs/fast_1.jpg" alt="中国天眼"><div class="wjl_cap"><h3>中国天眼 FAST</h3><p>没有立体阴影</p></div></div>
+            </div>
+            <div class="swiper-pagination" id="wjl_pagA"></div>
+          </div>
+        </div>
+      </div>
+      <div class="wjl_audit">
+        <h3>实测（自动读取 Swiper 参数）</h3>
+        <ul id="wjl_auditA"></ul>
+      </div>
+    </div>
+
+    <!-- ── 第 2 轮 ── -->
+    <div class="wjl_card">
+      <div class="wjl_cardTop">
+        <h2>第 2 轮 · 修正版 <span class="wjl_tag wjl_r2">全部通过</span></h2>
+        <p>提示词把 4 项需求拆成带编号的验收项，并指定参数名与取值，AI 无法再靠默认值蒙过去。</p>
+      </div>
+      <div class="wjl_code">new Swiper('#wySw4', {
+  loop: true,                     <span class="wjl_cmtG">// ① 无缝循环</span>
+  speed: 800,                     <span class="wjl_cmtG">// 切换动画 800ms</span>
+  effect: 'cube',                 <span class="wjl_cmtG">// ④ 初始 cube</span>
+  cubeEffect: {
+    shadow: true, slideShadows: true,
+    shadowOffset: 20, shadowScale: 0.94
+  },
+  autoplay: {
+    delay: 3200,                  <span class="wjl_cmtG">// ② 3.2 秒</span>
+    disableOnInteraction: false   <span class="wjl_cmtG">// ② 手动后不停</span>
+  },
+  pagination: {
+    el: '#wyPag4',
+    clickable: true               <span class="wjl_cmtG">// ③ 圆点可点</span>
+  }
+});</div>
+      <div class="wjl_demo">
+        <div class="wjl_chipLine">
+          <span class="wjl_chip">当前：第 <b id="wjl_idxB">1</b> / 5 张 · <span id="wjl_nameB">天宫空间站</span></span>
+          <span class="wjl_chip">实测 delay（已扣切换动画）：<b id="wjl_rateB">采样中…</b></span>
+        </div>
+        <div class="wjl_swiperWrap">
+          <div class="swiper" id="wjl_swB">
+            <div class="swiper-wrapper">
+              <div class="swiper-slide"><img src="swiper-imgs/tiangong_1.jpg" alt="天宫空间站"><div class="wjl_cap"><h3>天宫空间站</h3><p>第 2 轮：修正版配置</p></div></div>
+              <div class="swiper-slide"><img src="swiper-imgs/fuxing_1.jpg" alt="复兴号动车组"><div class="wjl_cap"><h3>复兴号动车组</h3><p>圆点可以直接点</p></div></div>
+              <div class="swiper-slide"><img src="swiper-imgs/c919_1.jpg" alt="C919大飞机"><div class="wjl_cap"><h3>C919 大飞机</h3><p>拖动后仍会继续翻</p></div></div>
+              <div class="swiper-slide"><img src="swiper-imgs/fendouzhe_1.jpg" alt="奋斗者号"><div class="wjl_cap"><h3>奋斗者号</h3><p>立体阴影可见</p></div></div>
+              <div class="swiper-slide"><img src="swiper-imgs/fast_1.jpg" alt="中国天眼"><div class="wjl_cap"><h3>中国天眼 FAST</h3><p>约 3.2 秒翻一张</p></div></div>
+            </div>
+            <div class="swiper-pagination" id="wjl_pagB"></div>
+          </div>
+        </div>
+      </div>
+      <div class="wjl_audit">
+        <h3>实测（自动读取 Swiper 参数）</h3>
+        <ul id="wjl_auditB"></ul>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="wjl_back">
+    <a href="index.html">← 返回首页</a>
+    <a href="swiper-task.html">返回 Swiper 任务页 →</a>
+  </div>
+
+  <footer class="wjl_footer">任务一验证页 · 两轮提示词对比 · 大国重器光影展 · 高级网页设计 · 2026-2027-1</footer>
+</div>
+
+<script>
+  // ══════════════════════════════════════════════════════════
+  //  两轮提示词对应的两份配置（同屏并排运行）
+  //  作者：吴君龙
+  //  建立时间：2026-11-09
+  //  使用模型：DeepSeek-V4.1-Flash
+  //  功能名称及简介：wjl_swA 承载第 1 轮（有遗漏）配置，
+  //                 wjl_swB 承载第 2 轮（逐条验收）配置，便于对比取证
+  //  注：页内两个容器用 wjl_swA / wjl_swB，仅为同屏对照方便
+  // ══════════════════════════════════════════════════════════
+
+  // ── 第 1 轮：AI 初版回答，原样照抄（loop 对，其余吃默认值）──
+  var wjl_swA = new Swiper('#wjl_swA', {
+    loop: true,
+    autoplay: true,
+    effect: 'cube',
+    pagination: { el: '#wjl_pagA' }
+  });
+
+  // ── 第 2 轮：按 4 项验收项修正后的配置 ──
+  var wjl_swB = new Swiper('#wjl_swB', {
+    loop: true,
+    speed: 800,
+    effect: 'cube',
+    cubeEffect: {
+      shadow: true,
+      slideShadows: true,
+      shadowOffset: 20,
+      shadowScale: 0.94
+    },
+    autoplay: {
+      delay: 3200,
+      disableOnInteraction: false
+    },
+    pagination: {
+      el: '#wjl_pagB',
+      clickable: true
+    }
+  });
+
+  /**
+   * 功能名称：wjl_renderAudit —— 自动读取实例参数并生成实测清单
+   * 功能简介：逐项读取 params 里的 loop / autoplay.delay /
+   *           disableOnInteraction / pagination.clickable，再检查
+   *           cube 阴影层是否真实生成，按通过与否渲染 ✓ / ✗
+   * 作者：吴君龙
+   * 建立时间：2026-11-09
+   * 使用模型：DeepSeek-V4.1-Flash
+   */
+  function wjl_renderAudit(listId, swiper, rootId) {
+    var wjl_root = document.getElementById(rootId);
+    var wjl_ap = swiper.params.autoplay;                 // 自动播放的真实参数
+    var wjl_items = [
+      {
+        ok: swiper.params.loop === true,
+        text: '① 循环 loop',
+        val: swiper.params.loop ? 'true' : 'false'
+      },
+      {
+        ok: wjl_ap.delay === 3200,
+        text: '② 自动播放 delay',
+        val: wjl_ap.delay + ' ms' + (wjl_ap.delay === 3200 ? '' : '（不是 3200）')
+      },
+      {
+        ok: wjl_ap.disableOnInteraction === false,
+        text: '② 手动操作后不停止',
+        val: 'disableOnInteraction: ' + wjl_ap.disableOnInteraction
+      },
+      {
+        ok: swiper.params.pagination.clickable === true,
+        text: '③ 圆点可点击',
+        val: 'clickable: ' + swiper.params.pagination.clickable
+      },
+      {
+        ok: !!wjl_root.querySelector('.swiper-cube-shadow'),
+        text: '④ cube 立体阴影',
+        val: wjl_root.querySelector('.swiper-cube-shadow') ? '已生成' : '未生成'
+      }
+    ];
+
+    var wjl_html = '';
+    wjl_items.forEach(function (item) {
+      wjl_html += '<li class="' + (item.ok ? 'wjl_ok' : 'wjl_no') + '">' +
+                  '<i>' + (item.ok ? '✓' : '✗') + '</i>' +
+                  '<div>' + item.text + '：<b>' + item.val + '</b></div></li>';
+    });
+    document.getElementById(listId).innerHTML = wjl_html;
+  }
+
+  /**
+   * 功能名称：wjl_initAudit —— 绑定切换事件、更新状态条与实测节拍
+   * 功能简介：每次 slideChange 计算与上一次的间隔并写入"实测节拍"，
+   *           一旦用户触摸或点圆点就清零重新计时，保证显示的是纯自动播放间隔
+   * 作者：吴君龙
+   * 建立时间：2026-11-09
+   * 使用模型：DeepSeek-V4.1-Flash
+   */
+  function wjl_initAudit(swiper, prefix) {
+    var wjl_last = null;          // 上一次切换的时间戳（null 表示重新开始计时）
+    var wjl_rateEl = document.getElementById('wjl_rate' + prefix);
+
+    // 用户手动干预时清零，避免把人工拖动的时间算进自动播放间隔
+    swiper.on('touchStart', function () { wjl_last = null; });
+    swiper.on('pointerDown', function () { wjl_last = null; });
+    swiper.el.addEventListener('click', function () { wjl_last = null; });
+
+    swiper.on('slideChange', function () {
+      // 状态条
+      var wjl_slide = swiper.slides[swiper.activeIndex];
+      var wjl_title = wjl_slide.querySelector('.wjl_cap h3');
+      document.getElementById('wjl_idx' + prefix).textContent = swiper.realIndex + 1;
+      document.getElementById('wjl_name' + prefix).textContent =
+        wjl_title ? wjl_title.textContent : '';
+
+      // 节拍：slideChange 触发的间隔 = delay + 切换动画时长(speed)，
+      // 扣掉 speed 才是用户真正配置的 delay，只采信 1 秒以上、20 秒以内的间隔
+      var wjl_now = Date.now();
+      if (wjl_last !== null) {
+        var wjl_gap = wjl_now - wjl_last - swiper.params.speed;
+        if (wjl_gap > 1000 && wjl_gap < 20000) {
+          wjl_rateEl.textContent = wjl_gap + ' ms';
+        }
+      }
+      wjl_last = wjl_now;
+    });
+  }
+
+  // 渲染两栏实测清单 + 挂载事件
+  wjl_renderAudit('wjl_auditA', wjl_swA, 'wjl_swA');
+  wjl_renderAudit('wjl_auditB', wjl_swB, 'wjl_swB');
+  wjl_initAudit(wjl_swA, 'A');
+  wjl_initAudit(wjl_swB, 'B');
+</script>
+</body>
+</html>
