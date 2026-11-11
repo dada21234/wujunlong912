@@ -1,68 +1,315 @@
 <!DOCTYPE html>
-<!--
-  ============================================================
-  页面名称：影视热播榜选项卡（wjl_rank_list.html）
-  作者：吴君龙
-  建立时间：2026-11-02
-  使用模型：GLM-5.3-Flash
-  功能简介：一比一还原课堂测试 5 的热播榜组件——四个选项卡
-            （每日 / 每周 / 每月 / 全部）切换不同榜单，榜单两列
-            各 5 条，第 1~3 名红橙色序号、4~10 名灰色序号；
-            JS 独立放在 js/wjl_rank.js 中外部引用，数据由 JS 渲染
-  ============================================================
--->
 <html lang="zh-CN">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>影视热播榜 · 吴君龙</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font: 14px/1.5 "Microsoft YaHei", sans-serif; background: #fff; padding: 40px 16px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="吴君龙的《高级网页设计》课堂实践目录">
+    <title>高级网页设计 · 课堂实践</title>
+    <style>
+        :root {
+            --ink: #17202a;
+            --muted: #64707d;
+            --paper: #f4f1e9;
+            --surface: rgba(255, 253, 247, .86);
+            --line: #d8d2c4;
+            --accent: #e05a3f;
+            --accent-dark: #a9382d;
+            --teal: #1e6f70;
+            --shadow: 0 20px 55px rgba(52, 46, 36, .12);
+        }
 
-    /* 组件整体 */
-    .wjl_widget { width: 460px; margin: 0 auto; border: 1px solid #e3e3e3; padding: 10px; }
+        * { box-sizing: border-box; }
 
-    /* 选项卡按钮区：选中的为深灰底白字 */
-    .wjl_tab_bar { display: flex; }
-    .wjl_tab_btn { flex: 1; height: 32px; line-height: 32px; text-align: center; background: #f5f5f5; border: 1px solid #ddd; margin-left: -1px; font-size: 14px; color: #333; cursor: pointer; }
-    .wjl_tab_btn:first-child { margin-left: 0; }
-    .wjl_tab_btn:hover { color: #f50; }
-    .wjl_tab_btn.wjl_active { background: #3d3d3d; border-color: #3d3d3d; color: #fff; font-weight: 700; }
+        html { scroll-behavior: smooth; }
 
-    /* 榜单区：左右两列各 5 条 */
-    .wjl_rank_cols { display: flex; padding: 16px 8px 6px; }
-    .wjl_rank_col { flex: 1; list-style: none; min-width: 0; }
-    .wjl_rank_col li { height: 32px; line-height: 32px; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
-    .wjl_rank_col li:hover { color: #f50; }
+        body {
+            margin: 0;
+            color: var(--ink);
+            background:
+                linear-gradient(125deg, rgba(224, 90, 63, .09), transparent 30%),
+                radial-gradient(circle at 90% 8%, rgba(30, 111, 112, .14), transparent 25%),
+                var(--paper);
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+            line-height: 1.7;
+        }
 
-    /* 序号徽章：1~3 名红橙色，4~10 名灰色 */
-    .wjl_num { display: inline-block; width: 20px; height: 15px; line-height: 15px; text-align: center; margin-right: 8px; border-radius: 2px; background: #b5b5b5; color: #fff; font-size: 12px; vertical-align: 1px; }
-    .wjl_num.wjl_top { background: linear-gradient(#ff8a30, #f43900); }
+        a { color: inherit; }
 
-    /* 返回首页链接 */
-    .wjl_back { display: block; width: max-content; margin: 20px auto; color: #5b7cfa; text-decoration: none; font-size: 14px; }
-    .wjl_back:hover { text-decoration: underline; }
-  </style>
+        .shell { width: min(1120px, calc(100% - 40px)); margin: 0 auto; }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 24px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .mark {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-weight: 800;
+            letter-spacing: .08em;
+        }
+
+        .mark-badge {
+            display: grid;
+            width: 38px;
+            height: 38px;
+            place-items: center;
+            color: #fffaf0;
+            background: var(--accent);
+            border-radius: 50%;
+            font-family: Georgia, serif;
+            font-size: 20px;
+        }
+
+        .topbar a { color: var(--muted); text-decoration: none; font-size: 14px; }
+        .topbar a:hover { color: var(--accent-dark); }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.3fr .7fr;
+            gap: 48px;
+            align-items: end;
+            min-height: 390px;
+            padding: 76px 0 64px;
+        }
+
+        .eyebrow {
+            margin: 0 0 20px;
+            color: var(--teal);
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+        }
+
+        h1, h2, p { margin-top: 0; }
+
+        h1 {
+            max-width: 720px;
+            margin-bottom: 22px;
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(44px, 7vw, 82px);
+            font-weight: 700;
+            letter-spacing: -.03em;
+            line-height: .98;
+        }
+
+        .hero-copy { max-width: 620px; color: var(--muted); font-size: 17px; }
+
+        .hero-note {
+            padding: 26px;
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            background: rgba(255, 253, 247, .5);
+            transform: rotate(2deg);
+        }
+
+        .hero-note strong { display: block; margin-bottom: 12px; color: var(--accent-dark); font-size: 28px; }
+        .hero-note p { margin-bottom: 0; color: var(--muted); font-size: 14px; }
+
+        main { padding-bottom: 80px; }
+
+        .section-heading {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        h2 { margin-bottom: 0; font-size: 25px; }
+        .section-heading span { color: var(--muted); font-size: 13px; }
+
+        .directory {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .lesson {
+            position: relative;
+            display: flex;
+            min-height: 205px;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 25px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            background: var(--surface);
+            box-shadow: 0 5px 0 rgba(30, 111, 112, .1);
+            text-decoration: none;
+            transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease;
+        }
+
+        .lesson::after {
+            position: absolute;
+            right: -28px;
+            bottom: -34px;
+            width: 110px;
+            height: 110px;
+            border: 1px solid rgba(224, 90, 63, .25);
+            border-radius: 50%;
+            content: "";
+        }
+
+        .lesson:hover { border-color: var(--accent); box-shadow: var(--shadow); transform: translateY(-5px); }
+        .lesson-number { color: var(--accent); font-family: Georgia, serif; font-size: 14px; }
+        .lesson h3 { margin: 13px 0 6px; font-size: 21px; }
+        .lesson p { margin-bottom: 0; color: var(--muted); font-size: 14px; }
+        .lesson-arrow { align-self: flex-end; color: var(--accent-dark); font-size: 24px; line-height: 1; }
+
+        .prompt {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            gap: 28px;
+            margin-top: 54px;
+            padding: 28px;
+            border-top: 3px solid var(--teal);
+            background: rgba(30, 111, 112, .07);
+        }
+
+        .prompt h2 { color: var(--teal); font-size: 18px; }
+        .prompt p { margin-bottom: 0; color: #46545a; font-size: 14px; }
+
+        footer { padding: 22px 0 36px; color: var(--muted); font-size: 13px; }
+        footer .shell { display: flex; justify-content: space-between; gap: 20px; border-top: 1px solid var(--line); padding-top: 18px; }
+
+        @media (max-width: 760px) {
+            .shell { width: min(100% - 28px, 560px); }
+            .topbar { padding: 18px 0; }
+            .hero { grid-template-columns: 1fr; gap: 28px; min-height: auto; padding: 58px 0 48px; }
+            h1 { font-size: clamp(46px, 15vw, 70px); }
+            .hero-note { max-width: 360px; }
+            .directory { grid-template-columns: 1fr; }
+            .lesson { min-height: 175px; }
+            .prompt { grid-template-columns: 1fr; gap: 8px; margin-top: 38px; padding: 22px; }
+            footer .shell { align-items: flex-start; flex-direction: column; gap: 4px; }
+        }
+    </style>
 </head>
+
 <body>
-  <!-- 影视热播榜组件：选项卡 + 榜单（榜单内容由 JS 渲染） -->
-  <div class="wjl_widget">
-    <!-- 选项卡按钮区：每日为默认选中（wjl_active），顺序与 JS 数据一一对应 -->
-    <div class="wjl_tab_bar" id="wjl_tab_bar">
-      <div class="wjl_tab_btn wjl_active">每日</div>
-      <div class="wjl_tab_btn">每周</div>
-      <div class="wjl_tab_btn">每月</div>
-      <div class="wjl_tab_btn">全部</div>
-    </div>
+    <header class="shell topbar">
+        <div class="mark"><span class="mark-badge">Y</span><span>吴君龙 · 课堂档案</span></div>
+        <a href="#directory">浏览课堂目录</a>
+    </header>
 
-    <!-- 榜单内容区：由 js/wjl_rank.js 按当前选中选项卡渲染两列榜单 -->
-    <div class="wjl_rank_cols" id="wjl_rank_cols"></div>
-  </div>
+    <main class="shell">
+        <section class="hero" aria-labelledby="page-title">
+            <div>
+                <p class="eyebrow">Advanced Web Design / Practice 01</p>
+                <h1 id="page-title">高级网页设计<br>课堂实践</h1>
+                <p class="hero-copy">从 HTML 的第一行代码开始，记录每一次页面结构、视觉表达与交互实践。这里是王垚的网页作品入口。</p>
+            </div>
+            <aside class="hero-note">
+                <strong>01 / 课程目录</strong>
+                <p>当前已收录基础知识与个人页面。新的课堂实践会持续加入这里。</p>
+            </aside>
+        </section>
 
-  <a class="wjl_back" href="index.html">返回首页</a>
+        <section id="directory" aria-labelledby="directory-title">
+            <div class="section-heading">
+                <h2 id="directory-title">课堂目录</h2>
+                <span>已收录 8 个主题入口</span>
+            </div>
+            <div class="directory">
+                <a class="lesson" href="#html-basics">
+                    <div>
+                        <span class="lesson-number">01 / FOUNDATION</span>
+                        <h3>HTML 基础</h3>
+                        <p>网页结构、常用标签与语义化标记的起点。</p>
+                    </div>
+                    <span class="lesson-arrow">↘</span>
+                </a>
+                <a class="lesson" href="./24001010912.html">
+                    <div>
+                        <span class="lesson-number">02 / PAGE PRACTICE</span>
+                        <h3>自我介绍网页</h3>
+                        <p>个人信息、兴趣列表、图片与表单元素实践。</p>
+                    </div>
+                    <span class="lesson-arrow">↗</span>
+                </a>
+                <a class="lesson" href="./strack912.html">
+          <div>
+          <span class="lesson-number">03 / CSS PRACTICE</span>
+          <h3>层叠与继承 + 盒模型</h3>
+          <p>学习 CSS 层叠、继承规则与盒模型的基础知识。</p>
+          </div>
+            <span class="lesson-arrow">↗</span>
+                 </a>
+                <a class="lesson" href="./tupian.html">
+          <div>
+          <span class="lesson-number">04 / CSS PRACTICE</span>
+          <h3>图文列表（上图下文和图上文字）</h3>
+          <p>学习相应列表格式与效果的基础知识。</p>
+          </div>
+            <span class="lesson-arrow">↗</span>
+                 </a>
+                <a class="lesson" href="./css003.html">
+                    <div>
+                        <span class="lesson-number">05 / CSS3 PRACTICE</span>
+                        <h3>css3＋animation</h3>
+                        <p>CSS3 选择器、动画与交互效果实践。</p>
+                    </div>
+                    <span class="lesson-arrow">↗</span>
+                </a>
+                <a class="lesson" href="./wjl_task1_verify.html">
+                    <div>
+                        <span class="lesson-number">06 / PROMPT ENGINEERING</span>
+                        <h3>任务一：提示词对比验证</h3>
+                        <p>对比两轮提示词生成结果，并查看参数验证。</p>
+                    </div>
+                    <span class="lesson-arrow">↗</span>
+                </a>
+                <a class="lesson" href="./wjl_task3_zoom.html">
+                    <div>
+                        <span class="lesson-number">07 / SWIPER ZOOM</span>
+                        <h3>任务三：双击缩放演示</h3>
+                        <p>浏览综合创作作品，体验图片双击缩放与平移。</p>
+                    </div>
+                    <span class="lesson-arrow">↗</span>
+                </a>
+                <a class="lesson" href="./swiper-task.html">
+                    <div>
+                        <span class="lesson-number">08 / SWIPER PRACTICE</span>
+                        <h3>Swiper 轮播组件练习</h3>
+                        <p>补全大国重器光影展中的轮播初始化代码。</p>
+                    </div>
+                    <span class="lesson-arrow">↗</span>
+                </a>
+                <a class="lesson" href="#future">
+                    <div>
+                        <span class="lesson-number">09 / COMING SOON</span>
+                        <h3>后续课堂实践</h3>
+                        <p>新模块正在整理，后续页面将在这里继续增加。</p>
+                    </div>
+                    <span class="lesson-arrow">+</span>
+                </a>
+            </div>
+        </section>
 
-  <!-- 外部引用 JS：独立放在 js 文件夹中 -->
-  <script src="js/wjl_rank.js"></script>
+        <section class="prompt" id="html-basics" aria-labelledby="prompt-title">
+            <h2 id="prompt-title">本次提示词</h2>
+            <p>创建一个新页面，包括本目录下的所有网页的超链接，使用原生代码，不使用cdn，新页面名称为index.html，主题为王垚的《高级网页设计》课堂实践，美化页面，课堂目录中包含HTML基础、自我介绍网页、其余模块后续在增加。页面中包括本提示词。<a href="./wjl_prompt.md">查看提示词记录（wjl_prompt.md）</a></p>
+        </section>
+    </main>
+
+    <footer id="future">
+        <div class="shell">
+            <span>吴君龙的《高级网页设计》课堂实践</span>
+            <span>© <span id="year"></span> / Native HTML · CSS · JS</span>
+        </div>
+    </footer>
+
+    <script>
+        document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
 </body>
+
 </html>
