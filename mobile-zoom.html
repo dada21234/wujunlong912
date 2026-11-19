@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<!-- 移动端必备①：viewport 不写会整体缩小 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b0b10">
+<title>任务三 · 图片查看器 | 双指缩放</title>
+<!--
+  功能名称：mobile-zoom.html —— 任务三「图片查看器：双指缩放 + 双击放大 + 拖动」
+  功能简介：容器 overflow:hidden / touch-action:none / user-select:none，
+            双指按距离比例在 1～4 倍之间缩放并以两指中点为基准（所以图片不会“跳”），
+            单指在放大状态下拖动查看细节，松手后限制在边界内，
+            双击在 1x / 2x 之间切换（0.25s 过渡），缩回 1x 自动居中；
+            监听 resize / orientationchange，旋转屏幕后重算边界、保留缩放状态。
+  作者：吴君龙
+  建立时间：2026-11-19
+  使用模型：DeepSeek-V4.1-Flash
+-->
+<style>
+  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: #0b0b10;
+    color: #eaeaf2;
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    padding-bottom: 32px;
+  }
+
+  .wjl_head { padding: 18px 18px 12px; }
+  .wjl_back {
+    display: inline-block;
+    color: #8fd3ff;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 6px 12px;
+    border: 1px solid rgba(143, 211, 255, .45);
+    border-radius: 999px;
+  }
+  .wjl_head h1 { margin: 14px 0 6px; font-size: 20px; letter-spacing: 1px; }
+  .wjl_meta { margin: 0; font-size: 12px; color: #8b8b9e; line-height: 1.7; }
+  .wjl_blank { color: #ffc46b; }
+
+  /* 查看器：手势归我，浏览器别管 */
+  .wjl_viewer {
+    position: relative;
+    height: 58vh;
+    min-height: 300px;
+    margin: 8px 14px 0;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #000;
+    border: 1px solid rgba(255, 255, 255, .1);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* 图片层：transform-origin 放在左上角，平移/缩放的计算才直观 */
+  .wjl_imgwrap {
+    position: absolute;
+    inset: 0;
+    transform-origin: 0 0;
+    will-change: transform;
+  }
+  .wjl_imgwrap img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;   /* 手势统一由容器接收，避免事件目标乱跑 */
+  }
+
+  /* 只有双击切换时才开过渡，手势过程中必须跟手 */
+  .wjl_anim { transition: transform .25s ease; }
+
+  .wjl_badge {
+    position: absolute;
+    top: 12px; right: 12px;
+    padding: 5px 11px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, .6);
+    border: 1px solid rgba(255, 255, 255, .18);
+    font-size: 12px;
+    color: #8fd3ff;
+  }
+
+  .wjl_tip {
+    position: absolute;
+    left: 50%; bottom: 14px;
+    transform: translateX(-50%);
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, .6);
+    border: 1px solid rgba(255, 255, 255, .16);
+    font-size: 12px;
+    color: #d7d7e4;
+    white-space: nowrap;
+    transition: opacity .3s ease;
+  }
+  .wjl_tip.wjl_hide { opacity: 0; }
+
+  .wjl_bar { display: flex; justify-content: center; gap: 10px; margin: 14px 14px 0; }
+  .wjl_btn {
+    flex: 1;
+    max-width: 120px;
+    padding: 11px 0;
+    font-size: 14px;
+    color: #eaeaf2;
+    background: #17171f;
+    border: 1px solid rgba(255, 255, 255, .14);
+    border-radius: 12px;
+    font-family: inherit;
+  }
+  .wjl_btn:active { background: #23232e; }
+
+  .wjl_panel {
+    margin: 20px 14px 0;
+    padding: 16px 16px 10px;
+    background: #13131a;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 16px;
+  }
+  .wjl_panel h2 { margin: 0 0 10px; font-size: 15px; color: #8fd3ff; }
+  .wjl_panel p, .wjl_panel li { font-size: 13px; line-height: 1.9; color: #b9b9c9; }
+  .wjl_panel ul { padding-left: 18px; margin: 0; }
+  .wjl_panel b { color: #eaeaf2; }
+</style>
+</head>
+<body>
+
+<header class="wjl_head">
+  <a class="wjl_back" href="index.html">← 返回首页</a>
+  <h1>任务三 · 图片查看器</h1>
+  <p class="wjl_meta">
+    姓名：吴君龙　学号：<span class="wjl_blank">待填写</span><br>
+    文件：mobile-zoom.html · 缩放范围 1x～4x
+  </p>
+</header>
+
+<div class="wjl_viewer" id="wjl_viewer">
+  <div class="wjl_imgwrap" id="wjl_imgwrap">
+    <img src="swiper-imgs/wjl_zoom_food.jpg" alt="麻婆豆腐·查看器示例图">
+  </div>
+  <div class="wjl_badge" id="wjl_badge">1.00x</div>
+  <div class="wjl_tip" id="wjl_tip">双击放大 2 倍 · 双指缩放 1～4 倍 · 放大后单指拖动</div>
+</div>
+
+<div class="wjl_bar">
+  <button class="wjl_btn" id="wjl_zin">放大 +</button>
+  <button class="wjl_btn" id="wjl_zout">缩小 −</button>
+  <button class="wjl_btn" id="wjl_reset">还原 1x</button>
+</div>
+
+<section class="wjl_panel">
+  <h2>为什么缩放时图片不会“跳”</h2>
+  <ul>
+    <li>缩放锚点取<b>两指中点</b>（双击时取双击点），按下那一刻先把该点坐标记下来；</li>
+    <li>缩放后反推平移量：<b>t' = m − (m − t) × (s'/s)</b>，保证该点在屏幕上原地不动；</li>
+    <li>每帧都做一次边界钳制：放大 s 倍后横向可用范围是 <b>−(W×(s−1)) ～ 0</b>，纵向同理。</li>
+  </ul>
+</section>
+
+<script>
+/**
+ * 功能名称：mobile-zoom 图片查看器
+ * 功能简介：双指缩放（1～4x，以两指中点为基准）、双击 1x/2x 切换、
+ *          放大后单指拖动并钳制边界、旋转屏幕重算边界不丢状态
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+var wjl_viewer = document.getElementById("wjl_viewer");
+var wjl_wrap = document.getElementById("wjl_imgwrap");
+var wjl_badge = document.getElementById("wjl_badge");
+var wjl_tip = document.getElementById("wjl_tip");
+
+var wjl_MIN = 1;          // 最小倍率
+var wjl_MAX = 4;          // 最大倍率
+var wjl_scale = 1;        // 当前倍率
+var wjl_tx = 0;           // 当前横向平移
+var wjl_ty = 0;           // 当前纵向平移
+var wjl_W = 0;            // 容器宽（变换的基准尺寸）
+var wjl_H = 0;            // 容器高
+
+var wjl_mode = "none";    // none / drag / pinch
+var wjl_startX = 0, wjl_startY = 0;       // 单指拖动起点
+var wjl_startTx = 0, wjl_startTy = 0;     // 手势开始时的平移
+var wjl_startDist = 0;    // 双指初始间距
+var wjl_startScale = 1;   // 双指初始倍率
+var wjl_midX = 0, wjl_midY = 0;           // 手势中心点（相对容器）
+var wjl_touchStartTime = 0;               // 用于双击判定
+var wjl_lastTap = 0;                      // 上一次抬手时间
+var wjl_tapMove = 0;                      // 本次按下到抬手的位移，用于排除“拖完算双击”
+
+/**
+ * 功能名称：wjl_measure —— 记录容器尺寸并重算边界
+ * 功能简介：横竖屏切换 / 窗口尺寸变化时调用；保留倍率与相对位置，只重新钳制平移量
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_measure() {
+  wjl_W = wjl_viewer.clientWidth;
+  wjl_H = wjl_viewer.clientHeight;
+  wjl_clamp();
+  wjl_apply(false);
+}
+
+/**
+ * 功能名称：wjl_clamp —— 平移边界钳制
+ * 功能简介：放大 s 倍后内容比容器大，可用平移范围是 [-(W*(s-1)), 0]；s=1 时只能居中
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_clamp() {
+  var wjl_maxX = wjl_W * (wjl_scale - 1);
+  var wjl_maxY = wjl_H * (wjl_scale - 1);
+  wjl_tx = Math.min(0, Math.max(-wjl_maxX, wjl_tx));
+  wjl_ty = Math.min(0, Math.max(-wjl_maxY, wjl_ty));
+}
+
+/**
+ * 功能名称：wjl_apply —— 把倍率与平移写到 transform
+ * 功能简介：animate=true 时加 .wjl_anim 走 0.25s 过渡（双击切换），手势中必须 false 才跟手
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_apply(animate) {
+  if (animate) {
+    wjl_wrap.classList.add("wjl_anim");
+  } else {
+    wjl_wrap.classList.remove("wjl_anim");
+  }
+  wjl_wrap.style.transform = "translate3d(" + wjl_tx + "px, " + wjl_ty + "px, 0) scale(" + wjl_scale + ")";
+  wjl_badge.textContent = wjl_scale.toFixed(2) + "x";
+}
+
+/**
+ * 功能名称：wjl_zoomTo —— 以某个锚点缩放
+ * 功能简介：锚点 (px,py) 是相对容器的坐标；按 t' = p - (p - t) * (next/now) 反推平移，
+ *          保证锚点处的画面在屏幕上原地不动，这就是“缩放不跳”的关键公式
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_zoomTo(next, px, py, animate) {
+  next = Math.min(wjl_MAX, Math.max(wjl_MIN, next));
+  var wjl_ratio = next / wjl_scale;
+  wjl_tx = px - (px - wjl_tx) * wjl_ratio;
+  wjl_ty = py - (py - wjl_ty) * wjl_ratio;
+  wjl_scale = next;
+  wjl_clamp();
+  wjl_apply(animate);
+}
+
+// ── 触摸：双指缩放 / 单指拖动 / 双击 ──
+wjl_viewer.addEventListener("touchstart", function (e) {
+  var wjl_rect = wjl_viewer.getBoundingClientRect();
+
+  if (e.touches.length >= 2) {
+    // 进入双指模式：记录初始间距、初始倍率、两指中点
+    var wjl_a = e.touches[0], wjl_b = e.touches[1];
+    wjl_mode = "pinch";
+    wjl_startDist = Math.hypot(wjl_b.clientX - wjl_a.clientX, wjl_b.clientY - wjl_a.clientY);
+    wjl_startScale = wjl_scale;
+    wjl_startTx = wjl_tx;
+    wjl_startTy = wjl_ty;
+    wjl_midX = (wjl_a.clientX + wjl_b.clientX) / 2 - wjl_rect.left;
+    wjl_midY = (wjl_a.clientY + wjl_b.clientY) / 2 - wjl_rect.top;
+    wjl_tapMove = 999;   // 多指不算双击
+    wjl_wrap.classList.remove("wjl_anim");
+    wjl_hideTip();
+    return;
+  }
+
+  // 单指
+  var wjl_t = e.touches[0];
+  wjl_mode = "drag";
+  wjl_startX = wjl_t.clientX;
+  wjl_startY = wjl_t.clientY;
+  wjl_startTx = wjl_tx;
+  wjl_startTy = wjl_ty;
+  wjl_touchStartTime = Date.now();
+  wjl_tapMove = 0;
+}, { passive: true });
+
+wjl_viewer.addEventListener("touchmove", function (e) {
+  // 阻止浏览器默认行为（整页缩放 / 滚动），因为容器是 passive:false
+  if (e.cancelable) e.preventDefault();
+
+  var wjl_rect = wjl_viewer.getBoundingClientRect();
+
+  if (e.touches.length >= 2) {
+    var wjl_a = e.touches[0], wjl_b = e.touches[1];
+    var wjl_dist = Math.hypot(wjl_b.clientX - wjl_a.clientX, wjl_b.clientY - wjl_a.clientY);
+    if (!wjl_startDist) return;
+
+    // 按比例算出目标倍率
+    var wjl_next = wjl_startScale * (wjl_dist / wjl_startDist);
+    wjl_next = Math.min(wjl_MAX, Math.max(wjl_MIN, wjl_next));
+
+    // 以“手势开始时记下的两指中点”为锚点反推平移
+    var wjl_ratio = wjl_next / wjl_startScale;
+    wjl_tx = wjl_midX - (wjl_midX - wjl_startTx) * wjl_ratio;
+    wjl_ty = wjl_midY - (wjl_midY - wjl_startTy) * wjl_ratio;
+    wjl_scale = wjl_next;
+
+    wjl_clamp();
+    wjl_apply(false);
+    return;
+  }
+
+  if (wjl_mode !== "drag") return;
+
+  var wjl_t = e.touches[0];
+  var wjl_dx = wjl_t.clientX - wjl_startX;
+  var wjl_dy = wjl_t.clientY - wjl_startY;
+  wjl_tapMove = Math.max(wjl_tapMove, Math.abs(wjl_dx) + Math.abs(wjl_dy));
+
+  // 只有放大状态才允许拖动；1x 时图片与容器等大，拖动没有意义
+  if (wjl_scale <= 1.01) return;
+
+  wjl_tx = wjl_startTx + wjl_dx;
+  wjl_ty = wjl_startTy + wjl_dy;
+  wjl_clamp();
+  wjl_apply(false);
+}, { passive: false });
+
+wjl_viewer.addEventListener("touchend", function (e) {
+  if (wjl_mode === "pinch") {
+    // 还剩一根手指时继续按拖动处理，避免手势中断
+    if (e.touches.length === 1) {
+      var wjl_t = e.touches[0];
+      wjl_mode = "drag";
+      wjl_startX = wjl_t.clientX;
+      wjl_startY = wjl_t.clientY;
+      wjl_startTx = wjl_tx;
+      wjl_startTy = wjl_ty;
+      wjl_tapMove = 999;
+      return;
+    }
+    // 双指全部离开
+    wjl_mode = "none";
+    if (wjl_scale < 1.05) {          // 缩回 1x 附近 → 自动居中
+      wjl_scale = 1; wjl_tx = 0; wjl_ty = 0;
+      wjl_apply(true);
+    }
+    return;
+  }
+
+  if (e.touches.length > 0) return;
+
+  // ── 双击判定：两次抬手间隔 < 300ms，且本次没有明显位移 ──
+  var wjl_now = Date.now();
+  wjl_mode = "none";
+  if (wjl_tapMove < 12 && wjl_now - wjl_touchStartTime < 300) {
+    if (wjl_now - wjl_lastTap < 300) {
+      var wjl_rect = wjl_viewer.getBoundingClientRect();
+      var wjl_to = e.changedTouches[0];
+      var wjl_px = wjl_to.clientX - wjl_rect.left;
+      var wjl_py = wjl_to.clientY - wjl_rect.top;
+      if (wjl_scale > 1.4) {
+        wjl_zoomTo(1, wjl_px, wjl_py, true);     // 双击还原，顺便居中
+      } else {
+        wjl_zoomTo(2, wjl_px, wjl_py, true);     // 双击放大到 2 倍
+        wjl_hideTip();
+      }
+      wjl_lastTap = 0;                            // 重置，避免三击被当成两次双击
+    } else {
+      wjl_lastTap = wjl_now;
+    }
+  }
+}, { passive: true });
+
+// 被电话 / 通知打断：结束手势，状态保持当前值
+wjl_viewer.addEventListener("touchcancel", function () {
+  wjl_mode = "none";
+  wjl_clamp();
+  wjl_apply(false);
+});
+
+/**
+ * 功能名称：wjl_hideTip —— 首次操作后淡出提示
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_hideTip() {
+  wjl_tip.classList.add("wjl_hide");
+}
+
+// ── 桌面端的三个按钮：方便电脑上也能验收 ──
+document.getElementById("wjl_zin").addEventListener("click", function () {
+  wjl_zoomTo(wjl_scale + 0.5, wjl_W / 2, wjl_H / 2, true);
+});
+document.getElementById("wjl_zout").addEventListener("click", function () {
+  wjl_zoomTo(wjl_scale - 0.5, wjl_W / 2, wjl_H / 2, true);
+});
+document.getElementById("wjl_reset").addEventListener("click", function () {
+  wjl_scale = 1; wjl_tx = 0; wjl_ty = 0;
+  wjl_apply(true);
+});
+
+// 尺寸 / 横竖屏变化：重算边界，保留倍率（验收第 ④ 条）
+window.addEventListener("resize", wjl_measure);
+window.addEventListener("orientationchange", function () {
+  setTimeout(wjl_measure, 120);   // 等系统完成旋转后再量
+});
+
+// 初始化
+wjl_measure();
+</script>
+</body>
+</html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<!-- 移动端必备①：不写 viewport，手机上整页会被缩小 -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#1b1220">
+<title>任务二 · 手势卡片 | 中华美食</title>
+<!--
+  功能名称：mobile-gesture.html —— 任务二「手势卡片：左右滑动切换内容」
+  功能简介：4 道中华美食卡片，touchstart 记起点、touchend 用 changedTouches[0] 算横向位移，
+            阈值 40px 判定左右滑；切换带 0.3s 过渡动画 + 300ms 冷却，防止一次滑动跳两张；
+            卡片容器用 touch-action: pan-y，纵向仍可滚动页面。
+  作者：吴君龙
+  建立时间：2026-11-19
+  使用模型：DeepSeek-V4.1-Flash
+-->
+<style>
+  /* 移动端必备②：全局去掉点击灰块 */
+  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: #120d17;
+    color: #f4edf7;
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    min-height: 100vh;
+    padding: 0 0 32px;
+  }
+
+  .wjl_head { padding: 18px 18px 10px; }
+  .wjl_back {
+    display: inline-block;
+    color: #ffc46b;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 6px 12px;
+    border: 1px solid rgba(255, 196, 107, .45);
+    border-radius: 999px;
+  }
+  .wjl_head h1 { margin: 14px 0 6px; font-size: 20px; letter-spacing: 1px; }
+  .wjl_meta { margin: 0; font-size: 12px; color: #9c8fa8; line-height: 1.7; }
+  .wjl_blank { color: #ffc46b; }
+
+  .wjl_main { padding: 6px 18px 0; }
+
+  /* 舞台：负责裁切动画溢出；pan-y 让纵向滚动交还浏览器 */
+  .wjl_stage {
+    position: relative;
+    height: 320px;
+    margin-top: 14px;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    overflow: hidden;
+    border-radius: 20px;
+  }
+
+  .wjl_card {
+    position: relative;
+    height: 100%;
+    padding: 22px 20px;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    background: linear-gradient(150deg, #ff9a56, #c0392b);
+    box-shadow: 0 18px 36px -18px rgba(0, 0, 0, .85);
+    transition: background .3s ease;
+  }
+  /* 卡片上那层淡淡的光斑，纯装饰 */
+  .wjl_card::before {
+    content: "";
+    position: absolute;
+    right: -50px; top: -60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .16);
+  }
+  .wjl_card::after {
+    content: "";
+    position: absolute;
+    left: -40px; bottom: -70px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, .14);
+  }
+
+  .wjl_num {
+    position: absolute;
+    top: 14px; right: 20px;
+    font-size: 54px;
+    font-weight: 700;
+    line-height: 1;
+    color: rgba(255, 255, 255, .35);
+    letter-spacing: 1px;
+  }
+  .wjl_dish { margin: 0 0 8px; font-size: 30px; letter-spacing: 2px; }
+  .wjl_desc { margin: 0 0 14px; font-size: 14px; line-height: 1.75; color: rgba(255, 255, 255, .92); }
+  .wjl_tags { display: flex; flex-wrap: wrap; gap: 8px; position: relative; z-index: 1; }
+  .wjl_tag {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, .22);
+    border: 1px solid rgba(255, 255, 255, .3);
+  }
+
+  /* 切换动画：0 → 60% 滑出淡出，55% 换到另一侧，再滑回；总时长 0.3s */
+  @keyframes wjl_next {
+    0%   { transform: translateX(0);      opacity: 1; }
+    45%  { transform: translateX(-58%);   opacity: 0; }
+    46%  { transform: translateX(58%);    opacity: 0; }
+    100% { transform: translateX(0);      opacity: 1; }
+  }
+  @keyframes wjl_prev {
+    0%   { transform: translateX(0);      opacity: 1; }
+    45%  { transform: translateX(58%);    opacity: 0; }
+    46%  { transform: translateX(-58%);   opacity: 0; }
+    100% { transform: translateX(0);      opacity: 1; }
+  }
+  .wjl_swap_next { animation: wjl_next .3s ease; }
+  .wjl_swap_prev { animation: wjl_prev .3s ease; }
+
+  /* 边界提示 */
+  .wjl_toast {
+    position: absolute;
+    left: 50%; bottom: 16px;
+    transform: translate(-50%, 12px);
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, .74);
+    border: 1px solid rgba(255, 255, 255, .18);
+    color: #fff;
+    font-size: 13px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+  }
+  .wjl_toast.wjl_show { opacity: 1; transform: translate(-50%, 0); }
+
+  .wjl_counter { text-align: center; margin: 16px 0 10px; font-size: 14px; color: #cbbfd5; }
+  .wjl_counter b { color: #ffc46b; font-size: 18px; }
+
+  .wjl_dots { display: flex; justify-content: center; gap: 8px; }
+  .wjl_dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .24);
+    transition: width .2s ease, background .2s ease;
+  }
+  .wjl_dot.wjl_on { width: 20px; border-radius: 999px; background: #ffc46b; }
+
+  .wjl_hint { text-align: center; font-size: 12px; color: #8b7d97; margin: 12px 0 22px; }
+
+  .wjl_panel {
+    background: #1b1424;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 16px;
+    padding: 16px 16px 8px;
+  }
+  .wjl_panel h2 { margin: 0 0 10px; font-size: 15px; color: #ffc46b; }
+  .wjl_panel li { font-size: 13px; line-height: 1.9; color: #c9bed2; margin-left: -12px; }
+  .wjl_code {
+    margin: 10px 0 0;
+    padding: 12px;
+    border-radius: 12px;
+    background: #100b16;
+    color: #9fe6b8;
+    font-size: 12px;
+    line-height: 1.8;
+    overflow-x: auto;
+    white-space: pre;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+  }
+</style>
+</head>
+<body>
+
+<header class="wjl_head">
+  <a class="wjl_back" href="index.html">← 返回首页</a>
+  <h1>任务二 · 手势卡片</h1>
+  <p class="wjl_meta">
+    姓名：吴君龙　学号：<span class="wjl_blank">待填写</span><br>
+    文件：mobile-gesture.html · 阈值 40px · 冷却 300ms
+  </p>
+</header>
+
+<main class="wjl_main">
+  <!-- 滑动舞台：只有这一块接管手势，页面其他区域照常滚动 -->
+  <section class="wjl_stage" id="wjl_stage">
+    <div class="wjl_card" id="wjl_card">
+      <div class="wjl_num" id="wjl_num">01</div>
+      <h2 class="wjl_dish" id="wjl_dish">宫保鸡丁</h2>
+      <p class="wjl_desc" id="wjl_desc">鸡丁滑嫩、花生酥脆，糊辣荔枝味先甜后辣，是川菜里最出圈的“下饭之王”。</p>
+      <div class="wjl_tags" id="wjl_tags"></div>
+    </div>
+    <div class="wjl_toast" id="wjl_toast">已经是第一张了</div>
+  </section>
+
+  <p class="wjl_counter">第 <b id="wjl_idx">1</b> / 4 张</p>
+  <div class="wjl_dots" id="wjl_dots"></div>
+  <p class="wjl_hint">左右滑动切换 · 纵向依旧可以滚动页面</p>
+
+  <section class="wjl_panel">
+    <h2>验收自查</h2>
+    <ul>
+      <li>① 短距离误触（&lt; 40px）不切换 —— 阈值生效</li>
+      <li>② 300ms 内连滑两次，只切一张 —— 冷却生效</li>
+      <li>③ 横向拖动时页面不跟着上下滚 —— touch-action: pan-y</li>
+      <li>④ 第一张往前滑 / 第四张往后滑，底部弹提示</li>
+    </ul>
+    <pre class="wjl_code">var wjl_dx = 抬手.clientX - wjl_startX;
+if (Math.abs(wjl_dx) &gt; 40) 左滑切下道 / 右滑切上道
+卡片容器: touch-action: pan-y</pre>
+  </section>
+</main>
+
+<script>
+/**
+ * 功能名称：mobile-gesture 手势卡片
+ * 功能简介：4 道美食数据 + 左右滑动切换（40px 阈值 / 300ms 冷却 / 0.3s 动画 / 边界提示）
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+var wjl_dishes = [
+  { name: "宫保鸡丁", desc: "鸡丁滑嫩、花生酥脆，糊辣荔枝味先甜后辣，是川菜里最出圈的“下饭之王”。", tags: ["川菜", "糊辣荔枝味"], bg: "linear-gradient(150deg, #ff9a56, #c0392b)" },
+  { name: "西湖醋鱼", desc: "草鱼氽熟后淋上糖醋汁，鱼肉带蟹味，酸甜清爽，是杭州楼外楼的招牌。", tags: ["浙菜", "酸甜"], bg: "linear-gradient(150deg, #5ec6a8, #1f6f63)" },
+  { name: "白切鸡", desc: "整鸡浸熟后过冰水，皮爽肉滑，蘸姜葱油最见功力，讲究“骨中带血”。", tags: ["粤菜", "原味"], bg: "linear-gradient(150deg, #f6d365, #c98b1b)" },
+  { name: "剁椒鱼头", desc: "胖头鱼头铺满剁椒上锅蒸，鲜辣直冲，最后浇一勺热油激香，湘菜代表。", tags: ["湘菜", "鲜辣"], bg: "linear-gradient(150deg, #ff6f91, #8e2b46)" }
+];
+
+var wjl_index = 0;          // 当前第几张（0 开始）
+var wjl_startX = 0;         // 手指按下时的横坐标
+var wjl_startY = 0;         // 手指按下时的纵坐标
+var wjl_locked = false;     // 动画进行中锁
+var wjl_lastFlip = 0;       // 上次切换的时间戳，用于冷却
+var wjl_THRESHOLD = 40;     // 滑动阈值（px）
+var wjl_COOLDOWN = 300;     // 冷却时间（ms）
+
+var wjl_card = document.getElementById("wjl_card");
+var wjl_toastEl = document.getElementById("wjl_toast");
+var wjl_stage = document.getElementById("wjl_stage");
+
+/**
+ * 功能名称：wjl_render —— 渲染第 i 张美食卡片
+ * 功能简介：把菜名、简介、标签、渐变背景写入卡片，并同步底部计数与圆点高亮
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_render(i) {
+  var wjl_d = wjl_dishes[i];
+  document.getElementById("wjl_num").textContent = "0" + (i + 1);
+  document.getElementById("wjl_dish").textContent = wjl_d.name;
+  document.getElementById("wjl_desc").textContent = wjl_d.desc;
+  document.getElementById("wjl_idx").textContent = i + 1;
+  wjl_card.style.background = wjl_d.bg;
+
+  // 标签
+  var wjl_tags = document.getElementById("wjl_tags");
+  wjl_tags.innerHTML = "";
+  wjl_d.tags.forEach(function (wjl_t) {
+    var wjl_span = document.createElement("span");
+    wjl_span.className = "wjl_tag";
+    wjl_span.textContent = wjl_t;
+    wjl_tags.appendChild(wjl_span);
+  });
+
+  // 圆点高亮
+  var wjl_dots = document.getElementById("wjl_dots").children;
+  for (var wjl_k = 0; wjl_k < wjl_dots.length; wjl_k++) {
+    wjl_dots[wjl_k].className = wjl_k === i ? "wjl_dot wjl_on" : "wjl_dot";
+  }
+}
+
+/**
+ * 功能名称：wjl_toast —— 底部边界提示
+ * 功能简介：显示一行提示文字，1.2 秒后自动淡出；重复触发时刷新计时器
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+var wjl_toastTimer = null;
+function wjl_toast(msg) {
+  wjl_toastEl.textContent = msg;
+  wjl_toastEl.classList.add("wjl_show");
+  clearTimeout(wjl_toastTimer);
+  wjl_toastTimer = setTimeout(function () {
+    wjl_toastEl.classList.remove("wjl_show");
+  }, 1200);
+}
+
+/**
+ * 功能名称：wjl_flip —— 切换到上一张 / 下一张
+ * 功能简介：dir=1 下一道、dir=-1 上一道；边界时只提示不切换；
+ *          切换时加 0.3s 动画（0.14s 处内容已不可见，此时换数据），
+ *          并设置 300ms 冷却，避免快速连滑一次跳两张
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_flip(dir) {
+  var wjl_now = Date.now();
+  if (wjl_locked || wjl_now - wjl_lastFlip < wjl_COOLDOWN) return;
+
+  var wjl_next = wjl_index + dir;
+  if (wjl_next < 0) { wjl_toast("已经是第一张了"); return; }
+  if (wjl_next >= wjl_dishes.length) { wjl_toast("已经是最后一张了"); return; }
+
+  wjl_locked = true;
+  wjl_lastFlip = wjl_now;
+  var wjl_cls = dir > 0 ? "wjl_swap_next" : "wjl_swap_prev";
+  wjl_card.classList.add(wjl_cls);
+
+  // 动画进行到 45% 时卡片已完全透明，此刻换内容用户看不到“跳”
+  setTimeout(function () {
+    wjl_index = wjl_next;
+    wjl_render(wjl_index);
+  }, 140);
+
+  setTimeout(function () {
+    wjl_card.classList.remove(wjl_cls);
+    wjl_locked = false;
+  }, 300);
+}
+
+// ── 触摸手势：记起点 → 算差值 → 比阈值 ──
+// 只监听 touchstart / touchend，不做 preventDefault，
+// 因为容器 touch-action: pan-y 已经把纵向滚动交给浏览器，横向手势由这里接管
+wjl_stage.addEventListener("touchstart", function (e) {
+  var wjl_t = e.touches[0];
+  wjl_startX = wjl_t.clientX;
+  wjl_startY = wjl_t.clientY;
+}, { passive: true });
+
+wjl_stage.addEventListener("touchend", function (e) {
+  // 抬手时这根手指已从 touches 中移除，必须用 changedTouches[0]
+  var wjl_t = e.changedTouches[0];
+  var wjl_dx = wjl_t.clientX - wjl_startX;
+  var wjl_dy = wjl_t.clientY - wjl_startY;
+
+  // 纵向位移更大 → 用户想滚页面，不拦
+  if (Math.abs(wjl_dy) > Math.abs(wjl_dx)) return;
+  // 位移不够阈值 → 视为误触
+  if (Math.abs(wjl_dx) < wjl_THRESHOLD) return;
+
+  wjl_flip(wjl_dx < 0 ? 1 : -1);
+}, { passive: true });
+
+// 接电话 / 系统弹窗打断时重置，避免状态卡住
+wjl_stage.addEventListener("touchcancel", function () {
+  wjl_locked = false;
+}, { passive: true });
+
+// 初始化：生成圆点并渲染第一张
+(function wjl_init() {
+  var wjl_box = document.getElementById("wjl_dots");
+  wjl_dishes.forEach(function () {
+    var wjl_i = document.createElement("i");
+    wjl_i.className = "wjl_dot";
+    wjl_box.appendChild(wjl_i);
+  });
+  wjl_render(0);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<!-- 移动端必备① -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#100d18">
+<title>任务一 · 事件侦探 | 一次拖动发生了什么</title>
+<!--
+  功能名称：mobile-touch-lab.html —— 任务一「事件侦探：一次拖动到底发生了什么」
+  功能简介：黑色探针区实时打印 touchstart / touchmove / touchend / click 的顺序与坐标，
+            并把手势轨迹画成草图；完成 5 种操作后，下方记录表会自动填好
+            事件顺序、touchmove 次数、click 是否出现、总用时，无需手抄。
+            另外附上验收三问的答案与踩坑记录。
+  作者：吴君龙
+  建立时间：2026-11-19
+  使用模型：DeepSeek-V4.1-Flash
+-->
+<style>
+  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: #100d18;
+    color: #f0ecf7;
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    padding-bottom: 32px;
+  }
+
+  .wjl_head { padding: 18px 18px 6px; }
+  .wjl_back {
+    display: inline-block;
+    color: #7ee0c1;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 6px 12px;
+    border: 1px solid rgba(126, 224, 193, .45);
+    border-radius: 999px;
+  }
+  .wjl_head h1 { margin: 14px 0 6px; font-size: 20px; letter-spacing: 1px; }
+  .wjl_meta { margin: 0; font-size: 12px; color: #8b83a0; line-height: 1.7; }
+  .wjl_blank { color: #ffc46b; }
+
+  .wjl_main { padding: 6px 16px 0; }
+
+  /* 探针区：要接手势，所以 touch-action:none */
+  .wjl_pad {
+    position: relative;
+    height: 240px;
+    margin-top: 12px;
+    border-radius: 18px;
+    background: #0a0810;
+    border: 1px solid rgba(255, 255, 255, .1);
+    overflow: hidden;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .wjl_padTxt {
+    position: absolute;
+    left: 0; right: 0; top: 16px;
+    text-align: center;
+    font-size: 13px;
+    color: #5c5570;
+    pointer-events: none;
+  }
+  .wjl_trail { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .wjl_xhair {
+    position: absolute;
+    width: 18px; height: 18px;
+    margin: -9px 0 0 -9px;
+    border-radius: 50%;
+    border: 2px solid #7ee0c1;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .12s ease;
+  }
+  .wjl_xhair.wjl_on { opacity: 1; }
+
+  .wjl_log {
+    height: 116px;
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: #0a0810;
+    border: 1px solid rgba(255, 255, 255, .08);
+    overflow: hidden;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 12px;
+    line-height: 1.75;
+    color: #9c93b5;
+  }
+  .wjl_log b { color: #7ee0c1; font-weight: 400; }
+
+  .wjl_bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 18px 0 8px;
+    font-size: 14px;
+  }
+  .wjl_bar span { color: #ffc46b; font-size: 12px; }
+
+  .wjl_table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    background: #17131f;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .wjl_table th, .wjl_table td {
+    padding: 10px 8px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, .07);
+    vertical-align: top;
+    line-height: 1.6;
+  }
+  .wjl_table th { color: #8b83a0; font-weight: 400; background: #1d1828; }
+  .wjl_table td:first-child { color: #f0ecf7; white-space: nowrap; }
+  .wjl_table tr:last-child td { border-bottom: 0; }
+  .wjl_wait { color: #5c5570; }
+  .wjl_done { color: #7ee0c1; }
+
+  .wjl_panel {
+    margin-top: 22px;
+    padding: 16px 16px 10px;
+    background: #17131f;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 16px;
+  }
+  .wjl_panel h2 { margin: 0 0 10px; font-size: 15px; color: #7ee0c1; }
+  .wjl_panel h2 + p { margin-top: -4px; }
+  .wjl_panel p, .wjl_panel li { font-size: 13px; line-height: 1.9; color: #b7aecb; margin: 0 0 10px; }
+  .wjl_panel b { color: #f0ecf7; }
+  .wjl_panel code {
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: #0a0810;
+    color: #9fe6b8;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 12px;
+  }
+  .wjl_q { margin: 0 0 4px; font-size: 13px; color: #ffc46b; }
+</style>
+</head>
+<body>
+
+<header class="wjl_head">
+  <a class="wjl_back" href="index.html">← 返回首页</a>
+  <h1>任务一 · 事件侦探</h1>
+  <p class="wjl_meta">
+    姓名：吴君龙　学号：<span class="wjl_blank">待填写</span><br>
+    文件：mobile-touch-lab.html · 探针 + 自动记录表
+  </p>
+</header>
+
+<main class="wjl_main">
+  <!-- 探针区 -->
+  <div class="wjl_pad" id="wjl_pad">
+    <p class="wjl_padTxt">在这里按一下、拖一拖、再抬起</p>
+    <svg class="wjl_trail" id="wjl_trail" viewBox="0 0 320 240" preserveAspectRatio="none">
+      <polyline id="wjl_line" points="" fill="none" stroke="#7ee0c1" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" opacity=".85"></polyline>
+    </svg>
+    <i class="wjl_xhair" id="wjl_xhair"></i>
+  </div>
+
+  <div class="wjl_log" id="wjl_log"></div>
+
+  <div class="wjl_bar">
+    <strong>自动记录表</strong>
+    <span id="wjl_progress">已记录 0 / 5</span>
+  </div>
+
+  <table class="wjl_table">
+    <thead>
+      <tr><th>操作</th><th>事件顺序</th><th>move</th><th>click</th><th>用时</th></tr>
+    </thead>
+    <tbody id="wjl_tbody">
+      <tr data-key="tap"><td>单击</td><td class="wjl_wait">待记录</td><td class="wjl_wait">—</td><td class="wjl_wait">—</td><td class="wjl_wait">—</td></tr>
+      <tr data-key="up"><td>向上拖动</td><td class="wjl_wait">待记录</td><td class="wjl_wait">—</td><td class="wjl_wait">—</td><td class="wjl_wait">—</td></tr>
+      <tr data-key="left"><td>向左快滑</td><td class="wjl_wait">待记录</td><td class="wjl_wait">—</td><td class="wjl_wait">—</td><td class="wjl_wait">—</td></tr>
+      <tr data-key="two"><td>双指触摸</td><td class="wjl_wait">待记录</td><td class="wjl_wait">—</td><td class="wjl_wait">—</td><td class="wjl_wait">—</td></tr>
+      <tr data-key="long"><td>长按后抬起</td><td class="wjl_wait">待记录</td><td class="wjl_wait">—</td><td class="wjl_wait">—</td><td class="wjl_wait">—</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:12px;color:#8b83a0;line-height:1.8;margin:10px 2px 0">
+    把上面 5 种操作各做一遍，表格会自动填写。换台手机再做一次，对比 touchmove 次数差异。
+  </p>
+
+  <section class="wjl_panel">
+    <h2>验收三问</h2>
+    <p class="wjl_q">① 一次拖动里 touchmove 大约触发多少次？和距离什么关系？</p>
+    <p>≈ 每秒 60 次（跟随屏幕刷新，约每 8～16ms 一次），高刷屏更多。次数与“按住时长”成正比，与距离正相关：同样的速度滑得越远，move 次数越多。表格里“move”一列就是这次实测值。</p>
+
+    <p class="wjl_q">② click 出现在 touchend 之前还是之后？</p>
+    <p><b>之后</b>。顺序固定为 <code>touchstart → touchmove×N → touchend → click</code>。系统补发的 click 是给“兼容老网页”用的，因此同一动作若两套逻辑都写了，就会执行两次。表格里“click”一列会直接标出这一点。</p>
+
+    <p class="wjl_q">③ 把 touchend 换成 touchcancel 会发生什么？</p>
+    <p><code>touchcancel</code> 只在手势被系统打断时触发（来电、通知下拉、手势被浏览器接管、触点过多）。正常抬手不会走这条分支——如果只监听它，正常松手就没有收尾逻辑，状态会卡死；反过来只写 touchend、不写 touchcancel，被电话打断时定时器与状态也不会清理。所以两个都要监听，前者收尾、后者兜底。</p>
+  </section>
+
+  <section class="wjl_panel">
+    <h2>遇到的坑与解决办法</h2>
+    <ul>
+      <li>抬手取坐标用 <code>touches[0]</code> 拿不到手指：<code>touchend</code> 时这根手指已经从 <code>touches</code> 里移除，必须用 <code>changedTouches[0]</code>。</li>
+      <li>“点一次执行两次”：touch 逻辑和 click 逻辑都写了；本页用 <code>click</code> 只做“记录”不做业务，避免冲突。</li>
+      <li>拖动时整页跟着滚：容器加了 <code>touch-action: none</code>，但只加在这一块上，body 不加。</li>
+      <li>长按弹出系统菜单：加了 <code>user-select: none</code> 与 <code>-webkit-touch-callout: none</code>。</li>
+    </ul>
+  </section>
+</main>
+
+<script>
+/**
+ * 功能名称：mobile-touch-lab 事件探针
+ * 功能简介：记录一次手势里的 touchstart / touchmove / touchend / click，
+ *          统计 move 次数与用时，按位移和时长自动归类到 5 个操作，并画出轨迹
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+var wjl_pad = document.getElementById("wjl_pad");
+var wjl_logBox = document.getElementById("wjl_log");
+var wjl_line = document.getElementById("wjl_line");
+var wjl_xhair = document.getElementById("wjl_xhair");
+var wjl_progress = document.getElementById("wjl_progress");
+
+var wjl_g = null;          // 当前手势对象；手指全部离开后置空
+var wjl_recorded = {};     // 已记录过的操作，避免重复覆盖
+
+/**
+ * 功能名称：wjl_log —— 打印一行日志
+ * 功能简介：只保留最近 5 行，最新的在最上面，方便截图
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_log(html) {
+  var wjl_row = document.createElement("div");
+  wjl_row.innerHTML = html;
+  wjl_logBox.insertBefore(wjl_row, wjl_logBox.firstChild);
+  while (wjl_logBox.children.length > 5) {
+    wjl_logBox.removeChild(wjl_logBox.lastChild);
+  }
+}
+
+/**
+ * 功能名称：wjl_mapPoint —— 屏幕坐标换算成探针区坐标
+ * 功能简介：把 client 坐标减掉探针区偏移，再按 SVG 的 320×240 视口等比缩放
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_mapPoint(clientX, clientY) {
+  var wjl_rect = wjl_pad.getBoundingClientRect();
+  return {
+    x: (clientX - wjl_rect.left) / wjl_rect.width * 320,
+    y: (clientY - wjl_rect.top) / wjl_rect.height * 240
+  };
+}
+
+/**
+ * 功能名称：wjl_drawTrail —— 画轨迹草图
+ * 功能简介：把本次手势记录的所有点连成折线，就是“加分项”里的手指轨迹
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_drawTrail() {
+  if (!wjl_g) return;
+  var wjl_str = wjl_g.pts.map(function (wjl_p) {
+    return wjl_p.x.toFixed(1) + "," + wjl_p.y.toFixed(1);
+  }).join(" ");
+  wjl_line.setAttribute("points", wjl_str);
+}
+
+/**
+ * 功能名称：wjl_classify —— 手势归类
+ * 功能简介：按“几根手指 / 时长 / 位移 / 主方向”把一次手势归到 5 类之一；
+ *          阈值 30px 用于区分点击与滑动，500ms 用于区分长按
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_classify(g) {
+  var wjl_dx = g.ex - g.sx;
+  var wjl_dy = g.ey - g.sy;
+  var wjl_dur = g.end - g.start;
+
+  if (g.two) return "two";
+  if (wjl_dur >= 500) return "long";
+  if (Math.abs(wjl_dx) < 30 && Math.abs(wjl_dy) < 30) return "tap";
+  if (Math.abs(wjl_dx) >= Math.abs(wjl_dy) && wjl_dx < 0) return "left";
+  if (wjl_dy < 0) return "up";
+  return null;
+}
+
+/**
+ * 功能名称：wjl_writeRow —— 把结果写进表格
+ * 功能简介：按 data-key 找到对应行，写入事件顺序 / move 次数 / click 情况 / 用时
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_writeRow(key, g) {
+  var wjl_row = document.querySelector('tr[data-key="' + key + '"]');
+  if (!wjl_row) return;
+
+  var wjl_cells = wjl_row.children;
+  wjl_cells[1].className = "wjl_done";
+  wjl_cells[1].textContent = "start → move×" + g.moves + " → end" + (g.clicks ? " → click" : "");
+  wjl_cells[2].className = "wjl_done";
+  wjl_cells[2].textContent = g.moves + " 次";
+  wjl_cells[3].className = "wjl_done";
+  wjl_cells[3].textContent = g.clicks ? "有（end 之后）" : "无";
+  wjl_cells[4].className = "wjl_done";
+  wjl_cells[4].textContent = (g.end - g.start) + " ms";
+
+  wjl_recorded[key] = true;
+  var wjl_n = Object.keys(wjl_recorded).length;
+  wjl_progress.textContent = "已记录 " + wjl_n + " / 5";
+}
+
+// ── touchstart：开始一次手势 ──
+wjl_pad.addEventListener("touchstart", function (e) {
+  var wjl_t = e.touches[0];
+  var wjl_p = wjl_mapPoint(wjl_t.clientX, wjl_t.clientY);
+
+  if (!wjl_g) {
+    // 第一根手指落下，新建手势
+    wjl_g = {
+      sx: wjl_t.clientX, sy: wjl_t.clientY,
+      ex: wjl_t.clientX, ey: wjl_t.clientY,
+      start: Date.now(), end: 0,
+      moves: 0, clicks: 0, two: false, pts: [wjl_p]
+    };
+    wjl_log("<b>touchstart</b> 1 指 · client(" + Math.round(wjl_t.clientX) + ", " + Math.round(wjl_t.clientY) + ")");
+  } else if (e.touches.length >= 2) {
+    // 第二根手指落下 → 标记为双指
+    wjl_g.two = true;
+    wjl_g.pts.push(wjl_p);
+    wjl_log("<b>touchstart</b> " + e.touches.length + " 指 · touches.length=" + e.touches.length);
+  }
+
+  wjl_xhair.style.left = wjl_t.clientX - wjl_pad.getBoundingClientRect().left + "px";
+  wjl_xhair.style.top = wjl_t.clientY - wjl_pad.getBoundingClientRect().top + "px";
+  wjl_xhair.classList.add("wjl_on");
+  wjl_drawTrail();
+}, { passive: true });
+
+// ── touchmove：累计次数与轨迹 ──
+wjl_pad.addEventListener("touchmove", function (e) {
+  if (!wjl_g) return;
+  var wjl_t = e.touches[0];
+  wjl_g.moves++;
+  wjl_g.ex = wjl_t.clientX;
+  wjl_g.ey = wjl_t.clientY;
+  if (wjl_g.moves % 3 === 1) {          // 每 3 次记一个轨迹点，避免折线太密
+    wjl_g.pts.push(wjl_mapPoint(wjl_t.clientX, wjl_t.clientY));
+  }
+  if (e.touches.length >= 2) wjl_g.two = true;
+
+  // 日志每 4 次刷一行，防止刷屏
+  if (wjl_g.moves % 4 === 0) {
+    wjl_log("<b>touchmove</b> ×" + wjl_g.moves + " · " + e.touches.length + " 指");
+  }
+  wjl_drawTrail();
+}, { passive: true });
+
+// ── touchend：收尾，等 click 补发完再落表 ──
+wjl_pad.addEventListener("touchend", function (e) {
+  if (!wjl_g) return;
+  var wjl_t = e.changedTouches[0];   // 抬手必须用 changedTouches
+  wjl_g.ex = wjl_t.clientX;
+  wjl_g.ey = wjl_t.clientY;
+
+  wjl_log("<b>touchend</b> 剩 " + e.touches.length + " 指 · changedTouches.length=" + e.changedTouches.length);
+  wjl_xhair.classList.remove("wjl_on");
+
+  if (e.touches.length > 0) return;   // 还有手指没离开，等全部抬起
+
+  wjl_g.end = Date.now();
+  var wjl_finished = wjl_g;
+
+  // click 是 touchend 之后补发的，等 320ms 再判定，才能准确记录“有没有 click”
+  setTimeout(function () {
+    var wjl_key = wjl_classify(wjl_finished);
+    if (wjl_key) {
+      wjl_writeRow(wjl_key, wjl_finished);
+    } else {
+      wjl_log("未归类的手势：dx=" + Math.round(wjl_finished.ex - wjl_finished.sx) + " dy=" + Math.round(wjl_finished.ey - wjl_finished.sy));
+    }
+    wjl_g = null;
+  }, 320);
+}, { passive: true });
+
+// ── click：只记录，不做业务，避免和 touch 逻辑重复执行 ──
+wjl_pad.addEventListener("click", function () {
+  if (!wjl_g) return;
+  wjl_g.clicks++;
+  wjl_log("<b>click</b> 在 touchend 之后补发");
+});
+
+// ── touchcancel：被电话 / 通知打断时兜底 ──
+wjl_pad.addEventListener("touchcancel", function () {
+  wjl_log("<b>touchcancel</b> 手势被系统打断");
+  wjl_g = null;
+  wjl_xhair.classList.remove("wjl_on");
+  wjl_line.setAttribute("points", "");
+}, { passive: true });
+</script>
+</body>
+</html>

@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<!-- 移动端必备① -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0f0f14">
+<title>任务四 · 摇一摇彩蛋 | 今日菜谱</title>
+<!--
+  功能名称：mobile-sensor.html —— 任务四 A「摇一摇彩蛋：摇出今日菜谱」
+  功能简介：监听 devicemotion，取 accelerationIncludingGravity 计算三轴合成加速度，
+            超过阈值 18 判定为摇动；触发后进入 1.5 秒冷却，保证一次摇动只触发一次；
+            随机抽一道菜并以弹出动画展示；
+            没有传感器 / 没有事件 / iOS 未授权时，统一显示“当前设备不支持”，
+            并提供“点我抽一次”按钮作为降级方案，保证不报错、不白屏。
+  作者：吴君龙
+  建立时间：2026-11-19
+  使用模型：DeepSeek-V4.1-Flash
+-->
+<style>
+  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: #0f0f14;
+    color: #f2f2f7;
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+    padding-bottom: 32px;
+  }
+
+  .wjl_head { padding: 18px 18px 8px; }
+  .wjl_back {
+    display: inline-block;
+    color: #a78bfa;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 6px 12px;
+    border: 1px solid rgba(167, 139, 250, .45);
+    border-radius: 999px;
+  }
+  .wjl_head h1 { margin: 14px 0 6px; font-size: 20px; letter-spacing: 1px; }
+  .wjl_meta { margin: 0; font-size: 12px; color: #8b8b9e; line-height: 1.7; }
+  .wjl_blank { color: #ffc46b; }
+
+  .wjl_main { padding: 6px 16px 0; }
+
+  .wjl_status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 4px;
+    font-size: 12px;
+    color: #9a9ab0;
+  }
+  .wjl_dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #6b7280;
+  }
+  .wjl_dot.wjl_ok { background: #34d399; box-shadow: 0 0 8px rgba(52, 211, 153, .8); }
+  .wjl_dot.wjl_bad { background: #f87171; }
+
+  /* 摇动区：移动端触摸三件套里要接管手势的那块才加 touch-action */
+  .wjl_shake {
+    position: relative;
+    margin-top: 10px;
+    height: 168px;
+    border-radius: 20px;
+    background: radial-gradient(circle at 50% 40%, rgba(167, 139, 250, .28), rgba(15, 15, 20, .9) 70%);
+    border: 1px solid rgba(255, 255, 255, .1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .wjl_phone {
+    width: 54px; height: 88px;
+    border-radius: 12px;
+    border: 2px solid #a78bfa;
+    position: relative;
+    transition: transform .12s ease;
+  }
+  .wjl_phone::after {
+    content: "";
+    position: absolute;
+    left: 50%; top: 7px;
+    width: 18px; height: 3px;
+    border-radius: 2px;
+    background: #a78bfa;
+    transform: translateX(-50%);
+  }
+  .wjl_shake.wjl_shaking .wjl_phone { animation: wjl_shakeAnim .5s ease; }
+  @keyframes wjl_shakeAnim {
+    0%, 100% { transform: rotate(0deg) translateX(0); }
+    20% { transform: rotate(-11deg) translateX(-7px); }
+    40% { transform: rotate(10deg) translateX(7px); }
+    60% { transform: rotate(-7deg) translateX(-4px); }
+    80% { transform: rotate(5deg) translateX(3px); }
+  }
+  .wjl_shakeTxt { font-size: 14px; color: #cfcbe6; }
+  .wjl_shakeSub { font-size: 12px; color: #7d7a94; }
+
+  .wjl_meter {
+    position: absolute;
+    left: 16px; right: 16px; bottom: 12px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, .1);
+    overflow: hidden;
+  }
+  .wjl_meterFill {
+    display: block;
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #34d399, #fbbf24, #f87171);
+    transition: width .08s linear;
+  }
+
+  /* 结果卡 */
+  .wjl_result {
+    margin-top: 16px;
+    min-height: 132px;
+    padding: 20px 18px;
+    border-radius: 18px;
+    background: #17171f;
+    border: 1px solid rgba(255, 255, 255, .1);
+    text-align: center;
+  }
+  .wjl_result.wjl_pop { animation: wjl_pop .45s cubic-bezier(.2, 1.3, .4, 1); }
+  @keyframes wjl_pop {
+    0% { transform: scale(.82); opacity: 0; }
+    60% { transform: scale(1.04); opacity: 1; }
+    100% { transform: scale(1); }
+  }
+  .wjl_resLabel { font-size: 12px; color: #8b8b9e; letter-spacing: 2px; }
+  .wjl_resName {
+    margin: 8px 0 6px;
+    font-size: 26px;
+    letter-spacing: 3px;
+    color: #ffc46b;
+  }
+  .wjl_resDesc { margin: 0; font-size: 13px; line-height: 1.8; color: #b9b9c9; }
+
+  .wjl_btn {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 13px 0;
+    font-size: 15px;
+    font-family: inherit;
+    color: #0f0f14;
+    background: #a78bfa;
+    border: 0;
+    border-radius: 14px;
+    font-weight: 600;
+  }
+  .wjl_btn:active { opacity: .78; }
+  .wjl_btn.wjl_ghost {
+    background: transparent;
+    color: #cfcbe6;
+    border: 1px solid rgba(255, 255, 255, .18);
+    font-weight: 400;
+  }
+  .wjl_hide { display: none; }
+
+  .wjl_panel {
+    margin: 22px 0 0;
+    padding: 16px 16px 10px;
+    background: #13131a;
+    border: 1px solid rgba(255, 255, 255, .08);
+    border-radius: 16px;
+  }
+  .wjl_panel h2 { margin: 0 0 10px; font-size: 15px; color: #a78bfa; }
+  .wjl_panel p, .wjl_panel li { font-size: 13px; line-height: 1.9; color: #b9b9c9; margin: 0 0 8px; }
+  .wjl_panel ul { padding-left: 18px; margin: 0; }
+  .wjl_panel b { color: #f2f2f7; }
+  .wjl_panel code {
+    padding: 1px 6px;
+    border-radius: 6px;
+    background: #0b0b10;
+    color: #9fe6b8;
+    font-family: ui-monospace, Menlo, Consolas, monospace;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<header class="wjl_head">
+  <a class="wjl_back" href="index.html">← 返回首页</a>
+  <h1>任务四 · 摇一摇彩蛋</h1>
+  <p class="wjl_meta">
+    姓名：吴君龙　学号：<span class="wjl_blank">待填写</span><br>
+    文件：mobile-sensor.html · 阈值 18 · 冷却 1.5s
+  </p>
+</header>
+
+<main class="wjl_main">
+  <div class="wjl_status">
+    <i class="wjl_dot" id="wjl_dot"></i>
+    <span id="wjl_status">正在检测传感器…</span>
+    <span id="wjl_acc" style="margin-left:auto;color:#6f6f85">合成加速度 0.0</span>
+  </div>
+
+  <div class="wjl_shake" id="wjl_shake">
+    <div class="wjl_phone"></div>
+    <div class="wjl_shakeTxt">摇一摇手机，抽今日菜谱</div>
+    <div class="wjl_shakeSub">阈值 18 · 一次摇动只触发一次</div>
+    <div class="wjl_meter"><i class="wjl_meterFill" id="wjl_meterFill"></i></div>
+  </div>
+
+  <div class="wjl_result" id="wjl_result">
+    <div class="wjl_resLabel">今 日 菜 谱</div>
+    <div class="wjl_resName" id="wjl_resName">—</div>
+    <p class="wjl_resDesc" id="wjl_resDesc">摇一摇手机，或者点下面的按钮，让今天吃点什么不再纠结。</p>
+  </div>
+
+  <!-- iOS 13+ 必须由用户点击才能申请权限 -->
+  <button class="wjl_btn wjl_hide" id="wjl_perm">开启动作传感器权限</button>
+  <button class="wjl_btn wjl_ghost" id="wjl_manual">点我抽一次</button>
+
+  <section class="wjl_panel">
+    <h2>为什么必须做降级</h2>
+    <p>
+      传感器不是所有设备都有：电脑浏览器、部分安卓平板、iOS 未授权、隐私模式，
+      都可能收不到 <code>devicemotion</code>。如果不做分支，页面就会一直停在“请摇一摇”，
+      用户会以为页面坏了。
+    </p>
+    <ul>
+      <li>没有 <code>DeviceMotionEvent</code> → 立刻提示“当前设备不支持”；</li>
+      <li>监听了但 1.5 秒内没有数据 → 同样提示“不支持”，并露出“点我抽一次”；</li>
+      <li>iOS 13+ 先在按钮里调用 <code>requestPermission()</code>，拒绝授权也走降级。</li>
+    </ul>
+    <h2 style="margin-top:16px">两个加速度的区别</h2>
+    <p>
+      <code>accelerationIncludingGravity</code> 含重力，静止时约 9.8；
+      <code>acceleration</code> 已扣除重力，静止时接近 0。
+      摇动判断用前者更稳，因为“甩”的动作会让重力方向的分量也剧烈变化。
+    </p>
+  </section>
+</main>
+
+<script>
+/**
+ * 功能名称：mobile-sensor 摇一摇彩蛋
+ * 功能简介：devicemotion 合成加速度 > 18 触发抽菜谱，1.5s 冷却；
+ *          无传感器 / 无数据 / 未授权时降级为“点我抽一次”
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+var wjl_dishes = [
+  { name: "麻婆豆腐", desc: "一勺红油配米饭，麻辣烫嘴，今天的疲惫就交给它。" },
+  { name: "番茄炒蛋", desc: "酸甜开胃、十分钟出锅，加班日的稳妥选择。" },
+  { name: "兰州拉面", desc: "清汤配牛肉，一青二白三红四绿，暖胃又暖手。" },
+  { name: "广式烧腊饭", desc: "叉烧蜜汁焦边，配一勺卤汁，越吃越香。" },
+  { name: "小笼包", desc: "薄皮十八褶，先咬破吸汤汁，再蘸醋吃。" },
+  { name: "湘西外婆菜", desc: "咸香微辣，一勺就能干掉半碗饭。" }
+];
+
+var wjl_THRESHOLD = 18;      // 判定摇动的合成加速度阈值
+var wjl_COOLDOWN = 1500;     // 冷却时间（ms）
+var wjl_lastShake = 0;       // 上次触发时间
+var wjl_motionSeen = false;  // 是否真的收到过数据
+var wjl_listening = false;   // 防止重复绑定
+
+var wjl_dot = document.getElementById("wjl_dot");
+var wjl_status = document.getElementById("wjl_status");
+var wjl_acc = document.getElementById("wjl_acc");
+var wjl_meterFill = document.getElementById("wjl_meterFill");
+var wjl_shakeBox = document.getElementById("wjl_shake");
+var wjl_result = document.getElementById("wjl_result");
+var wjl_resName = document.getElementById("wjl_resName");
+var wjl_resDesc = document.getElementById("wjl_resDesc");
+var wjl_permBtn = document.getElementById("wjl_perm");
+var wjl_manualBtn = document.getElementById("wjl_manual");
+
+/**
+ * 功能名称：wjl_setStatus —— 顶部状态灯与文案
+ * 功能简介：ok=绿色可用、bad=红色不可用、默认灰色检测中
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_setStatus(text, type) {
+  wjl_status.textContent = text;
+  wjl_dot.className = "wjl_dot" + (type ? " wjl_" + type : "");
+}
+
+/**
+ * 功能名称：wjl_pick —— 随机抽一道菜并播放弹出动画
+ * 功能简介：从 6 道菜里随机取一条写入结果卡，重新触发 .wjl_pop 动画
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_pick() {
+  var wjl_d = wjl_dishes[Math.floor(Math.random() * wjl_dishes.length)];
+  wjl_resName.textContent = wjl_d.name;
+  wjl_resDesc.textContent = wjl_d.desc;
+
+  // 先移除再强制重排，动画才会重新播放
+  wjl_result.classList.remove("wjl_pop");
+  void wjl_result.offsetWidth;
+  wjl_result.classList.add("wjl_pop");
+
+  // 摇动区也做一个摆动反馈
+  wjl_shakeBox.classList.remove("wjl_shaking");
+  void wjl_shakeBox.offsetWidth;
+  wjl_shakeBox.classList.add("wjl_shaking");
+
+  if (navigator.vibrate) navigator.vibrate(30);
+}
+
+/**
+ * 功能名称：wjl_onMotion —— devicemotion 处理
+ * 功能简介：用 accelerationIncludingGravity 三轴合成加速度判断摇动，
+ *          超过阈值且已过冷却时间才触发；同时把强度画成底部进度条
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_onMotion(e) {
+  var wjl_a = e.accelerationIncludingGravity;
+  if (!wjl_a || (wjl_a.x === null && wjl_a.y === null && wjl_a.z === null)) return;
+
+  wjl_motionSeen = true;
+  wjl_setStatus("传感器已就绪，摇一摇试试", "ok");
+
+  // Math.hypot(a,b,c) = √(x²+y²+z²)，静止时约等于 9.8（重力）
+  var wjl_mag = Math.hypot(wjl_a.x || 0, wjl_a.y || 0, wjl_a.z || 0);
+  wjl_acc.textContent = "合成加速度 " + wjl_mag.toFixed(1);
+  wjl_meterFill.style.width = Math.min(100, (wjl_mag / (wjl_THRESHOLD * 1.6)) * 100) + "%";
+
+  var wjl_now = Date.now();
+  if (wjl_mag > wjl_THRESHOLD && wjl_now - wjl_lastShake > wjl_COOLDOWN) {
+    wjl_lastShake = wjl_now;
+    wjl_pick();
+  }
+}
+
+/**
+ * 功能名称：wjl_fallback —— 降级
+ * 功能简介：把状态标红，显示“当前设备不支持，请用手机打开”，
+ *          隐藏授权按钮、保留“点我抽一次”，页面不白屏不报错
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_fallback(msg) {
+  wjl_setStatus(msg || "当前设备不支持，请用手机打开", "bad");
+  wjl_permBtn.classList.add("wjl_hide");
+  wjl_acc.textContent = "无传感器数据";
+  wjl_meterFill.style.width = "0%";
+}
+
+/**
+ * 功能名称：wjl_startMotion —— 绑定 devicemotion
+ * 功能简介：没有 DeviceMotionEvent 直接降级；绑定后 1.5 秒仍无数据也降级
+ * 作者：吴君龙
+ * 建立时间：2026-11-19
+ * 使用模型：DeepSeek-V4.1-Flash
+ */
+function wjl_startMotion() {
+  if (wjl_listening) return;
+  if (!window.DeviceMotionEvent) {
+    wjl_fallback();
+    return;
+  }
+  wjl_listening = true;
+  window.addEventListener("devicemotion", wjl_onMotion, { passive: true });
+  wjl_setStatus("正在检测摇动…");
+
+  // 绑定了却一直没有数据（台式机浏览器最典型），1.5 秒后降级
+  setTimeout(function () {
+    if (!wjl_motionSeen) {
+      wjl_fallback("当前设备不支持，请用手机打开");
+    }
+  }, 1500);
+}
+
+// ── 启动：iOS 13+ 需要用户点击申请权限 ──
+if (typeof DeviceMotionEvent !== "undefined" && typeof DeviceMotionEvent.requestPermission === "function") {
+  // iOS：先摆出授权按钮，点击后再申请，防止被系统直接拒绝
+  wjl_permBtn.classList.remove("wjl_hide");
+  wjl_setStatus("iOS 需要先授权动作传感器");
+  wjl_permBtn.addEventListener("click", function () {
+    DeviceMotionEvent.requestPermission().then(function (wjl_state) {
+      if (wjl_state === "granted") {
+        wjl_permBtn.classList.add("wjl_hide");
+        wjl_startMotion();
+      } else {
+        wjl_fallback("未获得传感器权限，请用下方按钮抽取");
+      }
+    }).catch(function () {
+      wjl_fallback("未获得传感器权限，请用下方按钮抽取");
+    });
+  });
+} else {
+  wjl_startMotion();
+}
+
+// 降级按钮：任何时候都能抽一次
+wjl_manualBtn.addEventListener("click", function () {
+  wjl_pick();
+});
+</script>
+</body>
+</html>
