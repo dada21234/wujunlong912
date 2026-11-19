@@ -167,6 +167,13 @@
   }
   .wjl_hide { display: none; }
 
+  .wjl_video {
+    display: block;
+    width: 100%;
+    border-radius: 12px;
+    background: #000;
+  }
+
   .wjl_panel {
     margin: 22px 0 0;
     padding: 16px 16px 10px;
@@ -222,6 +229,15 @@
   <!-- iOS 13+ 必须由用户点击才能申请权限 -->
   <button class="wjl_btn wjl_hide" id="wjl_perm">开启动作传感器权限</button>
   <button class="wjl_btn wjl_ghost" id="wjl_manual">点我抽一次</button>
+
+  <section class="wjl_panel">
+    <h2>操作演示</h2>
+    <video class="wjl_video" src="media/wjl_shake_demo.mp4" controls playsinline
+           preload="metadata" x5-playsinline webkit-playsinline></video>
+    <p style="font-size:12px;color:#8b8b9e;margin-top:8px">
+      真机录屏：摇动手机后触发抽菜谱，一次摇动只出一次结果。
+    </p>
+  </section>
 
   <section class="wjl_panel">
     <h2>为什么必须做降级</h2>

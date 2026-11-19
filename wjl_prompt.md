@@ -116,3 +116,8 @@
 - 模型：DeepSeek-V4.1-Flash
 - 提示词：帮我完成移动端触摸事件课程的 4 个任务：任务一事件侦探、任务二手势卡片、任务三图片查看器（双指缩放 + 双击放大 + 拖动）、任务四摇一摇，成果要能在手机浏览器打开（附课堂地址 https://spontaneous-valkyrie-4e4229.netlify.app/mobile-events-lesson，要求按项目规则使用 wjl_ 前缀、带首页链接与注释）
 
+
+## 2026-11-19 13:28:00
+- 模型：DeepSeek-V4.1-Flash
+- 提示词：把这个演示视频放到插到任务四里面，然后再帮我重新上传GitHub（附 20 秒真机录屏 video.mp4，117MB，超过 GitHub 单文件 100MB 限制，经授权下载 ffmpeg 便携包压缩为 1080p/5.1MB 后合入 media/wjl_shake_demo.mp4）
+
