@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>在线客服 | WJL 课程实践项目</title>
+  <!--
+    姓名：wujunlong | 学号：24001010912 | 时间：2026-11-23 | 大模型：DeepSeek-V4.1-Flash
+    说明：在线客服页面，通过后端 /api/service 代理调用七牛云 AI 推理接口。
+  -->
+  <link rel="stylesheet" href="css/wjl_index.css">
+  <link rel="stylesheet" href="css/wjl_chat.css">
+  <link rel="stylesheet" href="css/wjl_service.css">
+</head>
+<body>
+  <canvas id="wjl_canvas" class="wjl_canvas"></canvas>
+  <div class="wjl_aura wjl_aura_left"></div>
+  <div class="wjl_aura wjl_aura_right"></div>
+
+  <main class="wjl_page">
+    <a class="wjl_back" href="index.html">← 返回首页</a>
+
+    <header class="wjl_service_head">
+      <p class="wjl_hero_eyebrow">ONLINE SERVICE</p>
+      <h1 class="wjl_chat_title">在线客服</h1>
+      <p class="wjl_chat_desc">由七牛云 AI 推理服务驱动的智能客服「小七」，可解答订单、物流、退换货与优惠券问题。</p>
+    </header>
+
+    <div class="wjl_api_bar">
+      <span class="wjl_api_label">后端接口</span>
+      <a class="wjl_api_link" href="/api/service" target="_blank" rel="noopener">POST /api/service</a>
+      <span class="wjl_api_full" id="wjl_service_api_full"></span>
+      <span class="wjl_api_count" id="wjl_service_status">就绪</span>
+    </div>
+
+    <section class="wjl_service_panel">
+      <div class="wjl_service_topbar">
+        <span class="wjl_service_dot"></span>
+        <span class="wjl_service_name">客服小七</span>
+        <span class="wjl_service_tip">在线 · 通常 1 秒内回复</span>
+      </div>
+
+      <div class="wjl_chat_messages wjl_service_messages" id="wjl_service_messages" aria-live="polite"></div>
+
+      <div class="wjl_service_quick" id="wjl_service_quick">
+        <button type="button" class="wjl_service_chip" data-question="我的订单发货了吗？">查询物流</button>
+        <button type="button" class="wjl_service_chip" data-question="商品不想要了怎么申请退货？">申请退货</button>
+        <button type="button" class="wjl_service_chip" data-question="优惠券怎么使用？">优惠券使用</button>
+        <button type="button" class="wjl_service_chip" data-question="我要转人工客服">转人工</button>
+      </div>
+
+      <div class="wjl_chat_composer">
+        <textarea
+          class="wjl_chat_input"
+          id="wjl_service_input"
+          rows="2"
+          maxlength="2000"
+          placeholder="请描述你的问题，Enter 发送，Shift + Enter 换行"
+        ></textarea>
+        <button class="wjl_chat_send" id="wjl_service_send" type="button">发送</button>
+      </div>
+    </section>
+
+    <footer class="wjl_footer">
+      <span>wujunlong · 24001010912</span>
+      <span>七牛云 · qiniu/conatus-free</span>
+    </footer>
+  </main>
+
+  <script src="js/wjl_background.js"></script>
+  <script src="js/wjl_service.js"></script>
+</body>
+</html>

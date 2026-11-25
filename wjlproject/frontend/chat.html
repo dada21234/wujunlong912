@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 聊天 | WJL 课程实践项目</title>
+  <!--
+    姓名：wujunlong | 学号：24001010912 | 时间：2026-11-23 | 大模型：DeepSeek-V4.1-Flash
+    说明：AI 聊天页面，通过后端 /api/chat 代理调用硅基流动大模型接口。
+  -->
+  <link rel="stylesheet" href="css/wjl_index.css">
+  <link rel="stylesheet" href="css/wjl_chat.css">
+</head>
+<body>
+  <canvas id="wjl_canvas" class="wjl_canvas"></canvas>
+  <div class="wjl_aura wjl_aura_left"></div>
+  <div class="wjl_aura wjl_aura_right"></div>
+
+  <main class="wjl_page">
+    <a class="wjl_back" href="index.html">← 返回首页</a>
+
+    <header class="wjl_chat_head">
+      <p class="wjl_hero_eyebrow">AI CHAT</p>
+      <h1 class="wjl_chat_title">中华美食街 · 在线客服</h1>
+      <p class="wjl_chat_desc">
+        人设客服「小食」，只解答营业时间、招牌菜、配送范围；支持硅基流动 / 七牛云多平台热切换，密钥仅保存在后端 .env 中。
+      </p>
+    </header>
+
+    <div class="wjl_api_bar">
+      <span class="wjl_api_label">后端接口</span>
+      <a class="wjl_api_link" href="/api/chat" target="_blank" rel="noopener">POST /api/chat</a>
+      <span class="wjl_api_full" id="wjl_chat_api_full"></span>
+      <span class="wjl_api_count" id="wjl_chat_status">就绪</span>
+    </div>
+
+    <div class="wjl_chat_toolbar">
+      <label class="wjl_chat_toolbar_label" for="wjl_chat_provider">对话平台：</label>
+      <select class="wjl_chat_provider" id="wjl_chat_provider">
+        <option value="siliconflow">硅基流动（SiliconFlow）</option>
+        <option value="qiniu">七牛云（Qiniu）</option>
+      </select>
+      <span class="wjl_chat_toolbar_hint">切换后下一条消息即走新平台，对话历史保留</span>
+    </div>
+
+    <section class="wjl_chat_panel">
+      <div class="wjl_chat_messages" id="wjl_chat_messages" aria-live="polite"></div>
+      <div class="wjl_chat_composer">
+        <textarea
+          class="wjl_chat_input"
+          id="wjl_chat_input"
+          rows="2"
+          maxlength="2000"
+          placeholder="输入消息，Enter 发送，Shift + Enter 换行"
+        ></textarea>
+        <button class="wjl_chat_send" id="wjl_chat_send" type="button">发送</button>
+      </div>
+    </section>
+
+    <footer class="wjl_footer">
+      <span>wujunlong · 24001010912</span>
+      <span>多平台热切换 · Chat Completions（Key 仅在后端 .env）</span>
+    </footer>
+  </main>
+
+  <script src="js/wjl_background.js"></script>
+  <script src="js/wjl_chat.js"></script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WJL 课程实践项目 | wujunlong</title>
+  <!--
+    姓名：wujunlong | 学号：24001010912 | 时间：2026-11-19 | 大模型：DeepSeek-V4.1-Flash
+    说明：项目首页，展示个人信息、项目信息与全部已完成页面的导航入口。
+  -->
+  <link rel="stylesheet" href="css/wjl_index.css">
+</head>
+<body>
+  <canvas id="wjl_canvas" class="wjl_canvas"></canvas>
+  <div class="wjl_aura wjl_aura_left"></div>
+  <div class="wjl_aura wjl_aura_right"></div>
+
+  <main class="wjl_page">
+    <header class="wjl_hero">
+      <p class="wjl_hero_eyebrow">COURSE PROJECT · 2026</p>
+      <h1 class="wjl_hero_title">WJL 课程实践项目</h1>
+      <p class="wjl_hero_desc">
+        原生 HTML / CSS / JavaScript 前端，Node.js + Express 后端，MySQL 数据存储。
+      </p>
+
+      <ul class="wjl_meta">
+        <li class="wjl_meta_item">
+          <span class="wjl_meta_label">姓名</span>
+          <strong class="wjl_meta_value">wujunlong</strong>
+        </li>
+        <li class="wjl_meta_item">
+          <span class="wjl_meta_label">学号</span>
+          <strong class="wjl_meta_value">24001010912</strong>
+        </li>
+        <li class="wjl_meta_item">
+          <span class="wjl_meta_label">项目名称</span>
+          <strong class="wjl_meta_value">WJL 课程实践项目</strong>
+        </li>
+        <li class="wjl_meta_item">
+          <span class="wjl_meta_label">项目类别</span>
+          <strong class="wjl_meta_value">自选</strong>
+        </li>
+      </ul>
+    </header>
+
+    <section class="wjl_nav">
+      <div class="wjl_nav_head">
+        <h2 class="wjl_nav_title">页面导航</h2>
+        <span class="wjl_nav_hint">点击卡片进入对应页面</span>
+      </div>
+
+      <div class="wjl_cards">
+        <a class="wjl_card" href="index.html">
+          <span class="wjl_card_tag">HTML</span>
+          <h3 class="wjl_card_title">首页</h3>
+          <p class="wjl_card_desc">项目入口，汇总全部已完成页面</p>
+          <span class="wjl_card_arrow">→</span>
+        </a>
+
+        <a class="wjl_card" href="database.html">
+          <span class="wjl_card_tag">HTML</span>
+          <h3 class="wjl_card_title">数据库连接</h3>
+          <p class="wjl_card_desc">输入 MySQL 账号密码，测试数据库连接</p>
+          <span class="wjl_card_arrow">→</span>
+        </a>
+
+        <a class="wjl_card" href="news.html">
+          <span class="wjl_card_tag">HTML</span>
+          <h3 class="wjl_card_title">科技新闻</h3>
+          <p class="wjl_card_desc">从数据库读取并展示科技新闻列表</p>
+          <span class="wjl_card_arrow">→</span>
+        </a>
+
+        <a class="wjl_card" href="gallery.html">
+          <span class="wjl_card_tag">HTML</span>
+          <h3 class="wjl_card_title">图文列表</h3>
+          <p class="wjl_card_desc">网格布局展示数据库中的图文数据</p>
+          <span class="wjl_card_arrow">→</span>
+        </a>
+
+        <a class="wjl_card" href="chat.html">
+          <span class="wjl_card_tag">HTML</span>
+          <h3 class="wjl_card_title">AI 聊天</h3>
+          <p class="wjl_card_desc">接入硅基流动大模型的对话应用</p>
+          <span class="wjl_card_arrow">→</span>
+        </a>
+
+        <a class="wjl_card" href="service.html">
+          <span class="wjl_card_tag">HTML</span>
+          <h3 class="wjl_card_title">在线客服</h3>
+          <p class="wjl_card_desc">接入七牛云 AI 的智能客服页面</p>
+          <span class="wjl_card_arrow">→</span>
+        </a>
+
+        <a class="wjl_card" href="kb.html">
+          <span class="wjl_card_tag">RAG</span>
+          <h3 class="wjl_card_title">知识库问答</h3>
+          <p class="wjl_card_desc">上传资料解析入库，基于知识库检索作答</p>
+          <span class="wjl_card_arrow">→</span>
+        </a>
+
+        <a class="wjl_card" href="vision.html">
+          <span class="wjl_card_tag">AI</span>
+          <h3 class="wjl_card_title">图像识别</h3>
+          <p class="wjl_card_desc">上传图片，由视觉模型生成中文描述</p>
+          <span class="wjl_card_arrow">→</span>
+        </a>
+
+        <a class="wjl_card" href="asr.html">
+          <span class="wjl_card_tag">AI</span>
+          <h3 class="wjl_card_title">语音识别</h3>
+          <p class="wjl_card_desc">录制或上传音频，转写为文字</p>
+          <span class="wjl_card_arrow">→</span>
+        </a>
+
+        <a class="wjl_card" href="/api/health" target="_blank" rel="noopener">
+          <span class="wjl_card_tag">API</span>
+          <h3 class="wjl_card_title">接口自检</h3>
+          <p class="wjl_card_desc">GET /api/health，查看后端运行状态</p>
+          <span class="wjl_card_arrow">→</span>
+        </a>
+      </div>
+    </section>
+
+    <footer class="wjl_footer">
+      <span>wujunlong · 24001010912</span>
+      <span>Frontend &amp; Backend · Port 8912</span>
+    </footer>
+  </main>
+
+  <script src="js/wjl_background.js"></script>
+</body>
+</html>

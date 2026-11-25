@@ -1,0 +1,165 @@
+/*
+ * 姓名：wujunlong | 学号：24001010912 | 时间：2026-11-19 | 大模型：DeepSeek-V4.1-Flash
+ * 说明：数据库连接页面样式，表单、按钮与结果提示区的视觉状态。
+ */
+
+.wjl_page_narrow {
+  width: min(720px, 100% - 48px);
+}
+
+.wjl_back {
+  display: inline-block;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--wjl_text_dim);
+  text-decoration: none;
+  margin-bottom: 36px;
+  transition: color 0.2s ease;
+}
+
+.wjl_back:hover {
+  color: var(--wjl_accent);
+}
+
+.wjl_db_title {
+  font-size: clamp(28px, 5vw, 42px);
+  font-weight: 700;
+  line-height: 1.2;
+  background: linear-gradient(100deg, #ffffff 10%, #a9c6ff 60%, #b7a7ff 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.wjl_db_desc {
+  margin-top: 14px;
+  color: var(--wjl_text_dim);
+  font-size: 14px;
+}
+
+.wjl_db_card {
+  margin-top: 32px;
+  padding: 28px;
+  border: 1px solid var(--wjl_line);
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.wjl_db_form {
+  display: grid;
+  gap: 18px;
+}
+
+.wjl_field {
+  display: grid;
+  gap: 8px;
+}
+
+.wjl_field_label {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--wjl_text_dim);
+}
+
+.wjl_input {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--wjl_line);
+  border-radius: 12px;
+  background: rgba(6, 10, 22, 0.7);
+  color: var(--wjl_text);
+  font-size: 15px;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wjl_input::placeholder {
+  color: rgba(139, 155, 189, 0.6);
+}
+
+.wjl_input:focus {
+  border-color: rgba(106, 168, 255, 0.65);
+  box-shadow: 0 0 0 3px rgba(106, 168, 255, 0.15);
+}
+
+.wjl_btn {
+  margin-top: 4px;
+  padding: 13px 20px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(100deg, #4f8cff, #8f7bff);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.wjl_btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(80, 120, 255, 0.28);
+}
+
+.wjl_btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 结果提示区 */
+.wjl_result {
+  margin-top: 24px;
+  padding: 16px 18px;
+  border: 1px solid var(--wjl_line);
+  border-left-width: 4px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.wjl_result_idle {
+  border-left-color: rgba(139, 155, 189, 0.8);
+}
+
+.wjl_result_loading {
+  border-left-color: #6aa8ff;
+}
+
+.wjl_result_success {
+  border-left-color: #4cd18a;
+  background: rgba(76, 209, 138, 0.08);
+}
+
+.wjl_result_error {
+  border-left-color: #ff6b6b;
+  background: rgba(255, 107, 107, 0.08);
+}
+
+.wjl_result_title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.wjl_result_success .wjl_result_title {
+  color: #6ee7a8;
+}
+
+.wjl_result_error .wjl_result_title {
+  color: #ff8f8f;
+}
+
+.wjl_result_text {
+  font-size: 13px;
+  color: var(--wjl_text_dim);
+  word-break: break-all;
+  white-space: pre-line;
+}
+
+@media (max-width: 560px) {
+  .wjl_db_card {
+    padding: 20px;
+  }
+}

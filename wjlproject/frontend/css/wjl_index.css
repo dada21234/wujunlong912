@@ -1,0 +1,269 @@
+/*
+ * 姓名：wujunlong | 学号：24001010912 | 时间：2026-11-19 | 大模型：DeepSeek-V4.1-Flash
+ * 说明：首页样式，深色渐变背景 + 毛玻璃卡片，配合 canvas 粒子动画。
+ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --wjl_bg: #05070f;
+  --wjl_bg_soft: #0b1020;
+  --wjl_text: #eaf0ff;
+  --wjl_text_dim: #8b9bbd;
+  --wjl_line: rgba(140, 170, 255, 0.16);
+  --wjl_accent: #6aa8ff;
+  --wjl_accent_two: #8f7bff;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background: radial-gradient(circle at 20% 0%, #101a33 0%, var(--wjl_bg) 55%, #04050a 100%);
+  color: var(--wjl_text);
+  font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+.wjl_canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.wjl_aura {
+  position: fixed;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.35;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.wjl_aura_left {
+  top: -180px;
+  left: -160px;
+  background: rgba(78, 128, 255, 0.55);
+}
+
+.wjl_aura_right {
+  bottom: -220px;
+  right: -180px;
+  background: rgba(126, 92, 255, 0.45);
+}
+
+.wjl_page {
+  position: relative;
+  z-index: 1;
+  width: min(1120px, 100% - 48px);
+  margin: 0 auto;
+  padding: 88px 0 56px;
+}
+
+/* 顶部信息区 */
+.wjl_hero_eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.32em;
+  color: var(--wjl_accent);
+  margin-bottom: 18px;
+}
+
+.wjl_hero_title {
+  font-size: clamp(34px, 6vw, 62px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  background: linear-gradient(100deg, #ffffff 10%, #a9c6ff 55%, #b7a7ff 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.wjl_hero_desc {
+  margin-top: 18px;
+  max-width: 640px;
+  color: var(--wjl_text_dim);
+  font-size: 15px;
+}
+
+.wjl_meta {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 40px;
+}
+
+.wjl_meta_item {
+  padding: 18px 20px;
+  border: 1px solid var(--wjl_line);
+  border-radius: 14px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.wjl_meta_label {
+  display: block;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--wjl_text_dim);
+  margin-bottom: 6px;
+}
+
+.wjl_meta_value {
+  font-size: 16px;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+/* 页面导航 */
+.wjl_nav {
+  margin-top: 56px;
+}
+
+.wjl_nav_head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.wjl_nav_title {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.wjl_nav_hint {
+  font-size: 12px;
+  color: var(--wjl_text_dim);
+}
+
+.wjl_cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
+}
+
+.wjl_card {
+  position: relative;
+  display: block;
+  padding: 24px 22px 22px;
+  border: 1px solid var(--wjl_line);
+  border-radius: 18px;
+  text-decoration: none;
+  color: inherit;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  overflow: hidden;
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.wjl_card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, rgba(106, 168, 255, 0.18), rgba(143, 123, 255, 0.12));
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.wjl_card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(140, 180, 255, 0.45);
+  box-shadow: 0 18px 40px rgba(60, 110, 255, 0.18);
+}
+
+.wjl_card:hover::before {
+  opacity: 1;
+}
+
+.wjl_card_tag {
+  position: relative;
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--wjl_accent);
+  border: 1px solid rgba(106, 168, 255, 0.4);
+  border-radius: 999px;
+  padding: 2px 10px;
+  margin-bottom: 14px;
+}
+
+.wjl_card_title {
+  position: relative;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.wjl_card_desc {
+  position: relative;
+  font-size: 13px;
+  color: var(--wjl_text_dim);
+}
+
+.wjl_card_arrow {
+  position: absolute;
+  right: 20px;
+  bottom: 18px;
+  font-size: 18px;
+  color: var(--wjl_accent);
+  opacity: 0.5;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.wjl_card:hover .wjl_card_arrow {
+  transform: translateX(4px);
+  opacity: 1;
+}
+
+/* 页脚 */
+.wjl_footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 64px;
+  padding-top: 20px;
+  border-top: 1px solid var(--wjl_line);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--wjl_text_dim);
+}
+
+@media (max-width: 760px) {
+  .wjl_page {
+    padding: 56px 0 40px;
+  }
+
+  .wjl_meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wjl_nav_head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 460px) {
+  .wjl_meta {
+    grid-template-columns: 1fr;
+  }
+}

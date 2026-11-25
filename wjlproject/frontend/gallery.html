@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图文列表 | WJL 课程实践项目</title>
+  <!--
+    姓名：wujunlong | 学号：24001010912 | 时间：2026-11-19 | 大模型：DeepSeek-V4.1-Flash
+    说明：图文列表页面，数据来自 MySQL 的 wjl_gallery 表，由后端 /api/gallery 接口返回。
+  -->
+  <link rel="stylesheet" href="css/wjl_index.css">
+  <link rel="stylesheet" href="css/wjl_gallery.css">
+</head>
+<body>
+  <canvas id="wjl_canvas" class="wjl_canvas"></canvas>
+  <div class="wjl_aura wjl_aura_left"></div>
+  <div class="wjl_aura wjl_aura_right"></div>
+
+  <main class="wjl_page">
+    <a class="wjl_back" href="index.html">← 返回首页</a>
+
+    <header class="wjl_gallery_head">
+      <p class="wjl_hero_eyebrow">GALLERY</p>
+      <h1 class="wjl_gallery_title">图文列表</h1>
+      <p class="wjl_gallery_desc">图文数据存储在 MySQL 数据表 wjl_gallery 中，由后端接口读取返回。</p>
+    </header>
+
+    <div class="wjl_api_bar">
+      <span class="wjl_api_label">后端接口</span>
+      <a class="wjl_api_link" href="/api/gallery" target="_blank" rel="noopener">GET /api/gallery</a>
+      <span class="wjl_api_full" id="wjl_gallery_api_full"></span>
+      <span class="wjl_api_count" id="wjl_gallery_total">加载中...</span>
+    </div>
+
+    <section class="wjl_gallery_grid" id="wjl_gallery_list" aria-live="polite">
+      <p class="wjl_gallery_state">正在加载图文数据...</p>
+    </section>
+
+    <footer class="wjl_footer">
+      <span>wujunlong · 24001010912</span>
+      <span>MySQL · wjl_gallery</span>
+    </footer>
+  </main>
+
+  <script src="js/wjl_background.js"></script>
+  <script src="js/wjl_gallery.js"></script>
+</body>
+</html>

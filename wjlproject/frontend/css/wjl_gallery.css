@@ -1,0 +1,220 @@
+/*
+ * 姓名：wujunlong | 学号：24001010912 | 时间：2026-11-19 | 大模型：DeepSeek-V4.1-Flash
+ * 说明：图文列表页面样式，上图下文网格卡片与图片加载失败占位色块。
+ */
+
+.wjl_back {
+  display: inline-block;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--wjl_text_dim);
+  text-decoration: none;
+  margin-bottom: 36px;
+  transition: color 0.2s ease;
+}
+
+.wjl_back:hover {
+  color: var(--wjl_accent);
+}
+
+.wjl_gallery_title {
+  font-size: clamp(30px, 5vw, 46px);
+  font-weight: 700;
+  line-height: 1.2;
+  background: linear-gradient(100deg, #ffffff 10%, #a9c6ff 60%, #b7a7ff 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.wjl_gallery_desc {
+  margin-top: 14px;
+  max-width: 720px;
+  color: var(--wjl_text_dim);
+  font-size: 14px;
+}
+
+/* 接口信息栏 */
+.wjl_api_bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 28px;
+  padding: 14px 18px;
+  border: 1px solid var(--wjl_line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.wjl_api_label {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--wjl_text_dim);
+}
+
+.wjl_api_link {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 14px;
+  color: var(--wjl_accent);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(106, 168, 255, 0.5);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.wjl_api_link:hover {
+  color: #9cc4ff;
+  border-color: #9cc4ff;
+}
+
+.wjl_api_full {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+  color: rgba(139, 155, 189, 0.85);
+  word-break: break-all;
+}
+
+.wjl_api_count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--wjl_text_dim);
+  letter-spacing: 0.06em;
+}
+
+/* 网格卡片 */
+.wjl_gallery_grid {
+  margin-top: 22px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 18px;
+}
+
+.wjl_gallery_card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--wjl_line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.wjl_gallery_card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(140, 180, 255, 0.4);
+  box-shadow: 0 16px 34px rgba(60, 110, 255, 0.16);
+}
+
+.wjl_gallery_media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  overflow: hidden;
+  background: rgba(9, 14, 28, 0.9);
+}
+
+.wjl_gallery_img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 图片加载失败时的占位色块 */
+.wjl_gallery_media_fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1d2a4d, #3a2a63);
+}
+
+.wjl_gallery_media_fallback.wjl_gallery_tone_1 {
+  background: linear-gradient(135deg, #123442, #1f4f5e);
+}
+
+.wjl_gallery_media_fallback.wjl_gallery_tone_2 {
+  background: linear-gradient(135deg, #3b2430, #5a3346);
+}
+
+.wjl_gallery_media_fallback.wjl_gallery_tone_3 {
+  background: linear-gradient(135deg, #2c2f1c, #4a4a26);
+}
+
+.wjl_gallery_ph {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.55);
+  padding: 6px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+}
+
+.wjl_gallery_body {
+  padding: 16px 18px 18px;
+}
+
+.wjl_gallery_category {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: #b7a7ff;
+  border: 1px solid rgba(143, 123, 255, 0.45);
+  border-radius: 999px;
+  padding: 2px 10px;
+  margin-bottom: 10px;
+}
+
+.wjl_gallery_item_title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.45;
+  margin-bottom: 6px;
+}
+
+.wjl_gallery_item_desc {
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--wjl_text_dim);
+}
+
+.wjl_gallery_state {
+  grid-column: 1 / -1;
+  padding: 40px 24px;
+  text-align: center;
+  border: 1px dashed var(--wjl_line);
+  border-radius: 16px;
+  font-size: 14px;
+  color: var(--wjl_text_dim);
+}
+
+.wjl_gallery_state_error {
+  color: #ff8f8f;
+  border-color: rgba(255, 107, 107, 0.4);
+  background: rgba(255, 107, 107, 0.05);
+}
+
+@media (max-width: 760px) {
+  .wjl_gallery_grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+  }
+}
+
+@media (max-width: 520px) {
+  .wjl_gallery_grid {
+    grid-template-columns: 1fr;
+  }
+
+  .wjl_api_count {
+    margin-left: 0;
+  }
+
+  .wjl_gallery_body {
+    padding: 14px 16px 16px;
+  }
+}

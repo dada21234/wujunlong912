@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>语音识别 | WJL 课程实践项目</title>
+  <!--
+    姓名：wujunlong | 学号：24001010912 | 时间：2026-11-25 | 大模型：DeepSeek-V4.1-Flash
+    说明：语音识别页面，浏览器录音或上传音频，调用后端 /api/asr 返回识别文字。
+  -->
+  <link rel="stylesheet" href="css/wjl_index.css">
+  <link rel="stylesheet" href="css/wjl_asr.css">
+</head>
+<body>
+  <canvas id="wjl_canvas" class="wjl_canvas"></canvas>
+  <div class="wjl_aura wjl_aura_left"></div>
+  <div class="wjl_aura wjl_aura_right"></div>
+
+  <main class="wjl_page">
+    <a class="wjl_back" href="index.html">← 返回首页</a>
+
+    <header class="wjl_asr_head">
+      <p class="wjl_hero_eyebrow">AUDIO SPEECH RECOGNITION</p>
+      <h1 class="wjl_asr_title">语音识别</h1>
+      <p class="wjl_asr_desc">点击按钮录制语音，或上传音频文件，七牛云 ASR 模型会把语音转成文字；发送与接收的数据同时输出到控制台。</p>
+    </header>
+
+    <div class="wjl_api_bar">
+      <span class="wjl_api_label">后端接口</span>
+      <a class="wjl_api_link" href="/api/asr" target="_blank" rel="noopener">POST /api/asr</a>
+      <span class="wjl_api_full" id="wjl_asr_api_full"></span>
+      <span class="wjl_api_count" id="wjl_asr_status">就绪</span>
+    </div>
+
+    <div class="wjl_asr_layout">
+      <section class="wjl_asr_panel">
+        <h2 class="wjl_asr_panel_title">录制 / 上传音频</h2>
+
+        <div class="wjl_asr_record_wrap">
+          <button type="button" class="wjl_asr_record_btn" id="wjl_asr_record_btn">
+            <span class="wjl_asr_record_icon"></span>
+          </button>
+          <p class="wjl_asr_record_hint" id="wjl_asr_record_hint">点击开始录音</p>
+          <p class="wjl_asr_timer" id="wjl_asr_timer">00:00</p>
+        </div>
+
+        <audio class="wjl_asr_player" id="wjl_asr_player" controls hidden></audio>
+
+        <div class="wjl_asr_divider"><span>或上传音频文件</span></div>
+
+        <label class="wjl_asr_upload_btn" for="wjl_asr_file">选择音频文件</label>
+        <input type="file" id="wjl_asr_file" accept="audio/*" hidden>
+        <p class="wjl_asr_file_name" id="wjl_asr_file_name"></p>
+
+        <p class="wjl_asr_tip" id="wjl_asr_tip"></p>
+      </section>
+
+      <section class="wjl_asr_panel">
+        <div class="wjl_asr_result_head">
+          <h2 class="wjl_asr_panel_title">识别结果</h2>
+          <button type="button" class="wjl_asr_copy_btn" id="wjl_asr_copy_btn" hidden>复制</button>
+        </div>
+        <textarea class="wjl_asr_result" id="wjl_asr_result" readonly placeholder="识别完成后，这里会显示文字内容。"></textarea>
+        <p class="wjl_asr_meta" id="wjl_asr_meta"></p>
+      </section>
+    </div>
+
+    <footer class="wjl_footer">
+      <span>wujunlong · 24001010912</span>
+      <span>七牛云 · qiniu/Qwen-Audio-3.0-ASR-Flash</span>
+    </footer>
+  </main>
+
+  <script src="js/wjl_background.js"></script>
+  <script src="js/wjl_asr.js"></script>
+</body>
+</html>

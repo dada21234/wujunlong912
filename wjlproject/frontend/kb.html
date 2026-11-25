@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>知识库问答 | WJL 课程实践项目</title>
+  <!--
+    姓名：wujunlong | 学号：24001010912 | 时间：2026-11-23 | 大模型：DeepSeek-V4.1-Flash
+    说明：知识库（RAG）页面，支持文件上传解析、知识库管理与基于资料的问答。
+  -->
+  <link rel="stylesheet" href="css/wjl_index.css">
+  <link rel="stylesheet" href="css/wjl_kb.css">
+</head>
+<body>
+  <canvas id="wjl_canvas" class="wjl_canvas"></canvas>
+  <div class="wjl_aura wjl_aura_left"></div>
+  <div class="wjl_aura wjl_aura_right"></div>
+
+  <main class="wjl_page">
+    <a class="wjl_back" href="index.html">← 返回首页</a>
+
+    <header class="wjl_kb_head">
+      <p class="wjl_hero_eyebrow">RAG KNOWLEDGE BASE</p>
+      <h1 class="wjl_kb_title">知识库问答</h1>
+      <p class="wjl_kb_desc">上传企业资料（doc / docx / pptx / pdf / txt），系统自动解析切片并入库；提问时先检索资料，再交给大模型作答，答案附带引用来源。</p>
+    </header>
+
+    <div class="wjl_api_bar">
+      <span class="wjl_api_label">后端接口</span>
+      <a class="wjl_api_link" href="/api/kb/documents" target="_blank" rel="noopener">GET /api/kb/documents</a>
+      <a class="wjl_api_link" href="/api/kb/ask" target="_blank" rel="noopener">POST /api/kb/ask</a>
+      <span class="wjl_api_count" id="wjl_kb_status">就绪</span>
+    </div>
+
+    <div class="wjl_kb_layout">
+      <section class="wjl_kb_panel wjl_kb_manage">
+        <h2 class="wjl_kb_panel_title">知识库管理</h2>
+
+        <div class="wjl_kb_drop" id="wjl_kb_drop">
+          <input type="file" id="wjl_kb_file" accept=".doc,.docx,.ppt,.pptx,.pdf,.txt" hidden>
+          <p class="wjl_kb_drop_main">点击选择文件，或拖拽到此处上传</p>
+          <p class="wjl_kb_drop_sub">支持 doc / docx / pptx / pdf / txt，单个文件不超过 20MB</p>
+        </div>
+
+        <p class="wjl_kb_upload_tip" id="wjl_kb_upload_tip"></p>
+
+        <h3 class="wjl_kb_subtitle">已入库文件 <span id="wjl_kb_doc_total">0</span> 个</h3>
+        <ul class="wjl_kb_doc_list" id="wjl_kb_doc_list">
+          <li class="wjl_kb_empty">加载中…</li>
+        </ul>
+      </section>
+
+      <section class="wjl_kb_panel wjl_kb_ask">
+        <h2 class="wjl_kb_panel_title">基于知识库提问</h2>
+
+        <textarea
+          class="wjl_kb_question"
+          id="wjl_kb_question"
+          rows="3"
+          maxlength="500"
+          placeholder="例如：签收后几天内可以无理由退货？"
+        ></textarea>
+
+        <div class="wjl_kb_ask_actions">
+          <button type="button" class="wjl_kb_btn" id="wjl_kb_ask_btn">提问</button>
+          <span class="wjl_kb_ask_tip">回答仅依据知识库资料生成</span>
+        </div>
+
+        <div class="wjl_kb_answer" id="wjl_kb_answer" aria-live="polite">
+          <p class="wjl_kb_answer_placeholder">提问后，这里会显示答案与引用来源。</p>
+        </div>
+      </section>
+    </div>
+
+    <footer class="wjl_footer">
+      <span>wujunlong · 24001010912</span>
+      <span>RAG · MySQL + 关键词检索 + DeepSeek</span>
+    </footer>
+  </main>
+
+  <script src="js/wjl_background.js"></script>
+  <script src="js/wjl_kb.js"></script>
+</body>
+</html>

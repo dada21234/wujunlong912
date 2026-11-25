@@ -1,0 +1,178 @@
+/*
+ * 姓名：wujunlong | 学号：24001010912 | 时间：2026-11-23 | 大模型：DeepSeek-V4.1-Flash
+ * 说明：图像识别页面样式，桌面双栏、移动端单栏。
+ */
+
+.wjl_vision_head {
+  margin-top: 18px;
+}
+
+.wjl_vision_title {
+  margin: 6px 0 8px;
+  font-size: clamp(30px, 5vw, 44px);
+  letter-spacing: -1px;
+  color: var(--wjl_text);
+}
+
+.wjl_vision_desc {
+  max-width: 720px;
+  color: var(--wjl_text_dim);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.wjl_vision_layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.wjl_vision_panel {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border: 1px solid var(--wjl_line);
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  min-width: 0;
+}
+
+.wjl_vision_panel_title {
+  margin: 0 0 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--wjl_text);
+}
+
+.wjl_vision_drop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  border: 1.5px dashed rgba(140, 180, 255, 0.4);
+  border-radius: 14px;
+  background: rgba(106, 168, 255, 0.05);
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.wjl_vision_drop:hover,
+.wjl_vision_drop.wjl_vision_drop_active {
+  border-color: rgba(140, 180, 255, 0.85);
+  background: rgba(106, 168, 255, 0.12);
+}
+
+.wjl_vision_placeholder {
+  text-align: center;
+  padding: 20px;
+}
+
+.wjl_vision_drop_main {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: #bcd2ff;
+}
+
+.wjl_vision_drop_sub {
+  margin: 0;
+  font-size: 12px;
+  color: var(--wjl_text_dim);
+}
+
+.wjl_vision_preview {
+  display: none;
+  max-width: 100%;
+  max-height: 340px;
+  object-fit: contain;
+}
+
+.wjl_vision_drop.wjl_vision_has_image .wjl_vision_placeholder {
+  display: none;
+}
+
+.wjl_vision_drop.wjl_vision_has_image .wjl_vision_preview {
+  display: block;
+}
+
+.wjl_vision_tip {
+  min-height: 18px;
+  margin: 10px 2px 0;
+  font-size: 12px;
+  color: var(--wjl_text_dim);
+}
+
+.wjl_vision_tip.wjl_vision_tip_error {
+  color: #ff8f8f;
+}
+
+.wjl_vision_btn {
+  margin-top: 12px;
+  padding: 11px 0;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4a7dff, #6aa8ff);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.wjl_vision_btn:hover {
+  transform: translateY(-1px);
+}
+
+.wjl_vision_btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.wjl_vision_result {
+  flex: 1;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid var(--wjl_line);
+  background: rgba(8, 13, 26, 0.45);
+  min-height: 240px;
+  font-size: 14px;
+  line-height: 1.9;
+  color: var(--wjl_text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.wjl_vision_result_placeholder {
+  margin: 0;
+  color: var(--wjl_text_dim);
+  font-size: 13px;
+}
+
+.wjl_vision_result_error {
+  color: #ff9b9b;
+}
+
+.wjl_vision_meta {
+  min-height: 18px;
+  margin: 10px 2px 0;
+  font-size: 12px;
+  color: var(--wjl_text_dim);
+}
+
+@media (max-width: 860px) {
+  .wjl_vision_layout {
+    grid-template-columns: 1fr;
+  }
+
+  .wjl_vision_panel {
+    padding: 16px;
+  }
+
+  .wjl_vision_drop {
+    min-height: 200px;
+  }
+}

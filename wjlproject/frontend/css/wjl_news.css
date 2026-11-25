@@ -1,0 +1,189 @@
+/*
+ * 姓名：wujunlong | 学号：24001010912 | 时间：2026-11-19 | 大模型：DeepSeek-V4.1-Flash
+ * 说明：科技新闻列表页面样式，接口信息栏与新闻卡片列表。
+ */
+
+.wjl_back {
+  display: inline-block;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  color: var(--wjl_text_dim);
+  text-decoration: none;
+  margin-bottom: 36px;
+  transition: color 0.2s ease;
+}
+
+.wjl_back:hover {
+  color: var(--wjl_accent);
+}
+
+.wjl_news_title {
+  font-size: clamp(30px, 5vw, 46px);
+  font-weight: 700;
+  line-height: 1.2;
+  background: linear-gradient(100deg, #ffffff 10%, #a9c6ff 60%, #b7a7ff 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.wjl_news_desc {
+  margin-top: 14px;
+  max-width: 720px;
+  color: var(--wjl_text_dim);
+  font-size: 14px;
+}
+
+/* 接口信息栏 */
+.wjl_api_bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 14px;
+  margin-top: 28px;
+  padding: 14px 18px;
+  border: 1px solid var(--wjl_line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.wjl_api_label {
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  color: var(--wjl_text_dim);
+}
+
+.wjl_api_link {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 14px;
+  color: var(--wjl_accent);
+  text-decoration: none;
+  border-bottom: 1px dashed rgba(106, 168, 255, 0.5);
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.wjl_api_link:hover {
+  color: #9cc4ff;
+  border-color: #9cc4ff;
+}
+
+.wjl_api_full {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 12px;
+  color: rgba(139, 155, 189, 0.85);
+  word-break: break-all;
+}
+
+.wjl_api_count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--wjl_text_dim);
+  letter-spacing: 0.06em;
+}
+
+/* 新闻列表 */
+.wjl_news_list {
+  margin-top: 22px;
+  display: grid;
+  gap: 16px;
+}
+
+.wjl_news_item {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 18px;
+  padding: 22px 24px;
+  border: 1px solid var(--wjl_line);
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.wjl_news_item:hover {
+  transform: translateY(-2px);
+  border-color: rgba(140, 180, 255, 0.4);
+  box-shadow: 0 16px 34px rgba(60, 110, 255, 0.14);
+}
+
+.wjl_news_index {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: rgba(106, 168, 255, 0.55);
+  line-height: 1.1;
+}
+
+.wjl_news_body {
+  min-width: 0;
+}
+
+.wjl_news_top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.wjl_news_source {
+  font-size: 12px;
+  color: var(--wjl_text_dim);
+}
+
+.wjl_news_item_title {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.45;
+  margin-bottom: 8px;
+}
+
+.wjl_news_summary {
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--wjl_text_dim);
+}
+
+.wjl_news_meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: rgba(139, 155, 189, 0.85);
+}
+
+.wjl_news_state {
+  padding: 40px 24px;
+  text-align: center;
+  border: 1px dashed var(--wjl_line);
+  border-radius: 16px;
+  font-size: 14px;
+  color: var(--wjl_text_dim);
+}
+
+.wjl_news_state_error {
+  color: #ff8f8f;
+  border-color: rgba(255, 107, 107, 0.4);
+  background: rgba(255, 107, 107, 0.05);
+}
+
+@media (max-width: 600px) {
+  .wjl_news_item {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 18px;
+  }
+
+  .wjl_news_index {
+    font-size: 16px;
+  }
+
+  .wjl_api_count {
+    margin-left: 0;
+  }
+}

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>图像识别 | WJL 课程实践项目</title>
+  <!--
+    姓名：wujunlong | 学号：24001010912 | 时间：2026-11-23 | 大模型：DeepSeek-V4.1-Flash
+    说明：图像识别页面，上传图片后调用后端 /api/vision 返回图片描述。
+  -->
+  <link rel="stylesheet" href="css/wjl_index.css">
+  <link rel="stylesheet" href="css/wjl_vision.css">
+</head>
+<body>
+  <canvas id="wjl_canvas" class="wjl_canvas"></canvas>
+  <div class="wjl_aura wjl_aura_left"></div>
+  <div class="wjl_aura wjl_aura_right"></div>
+
+  <main class="wjl_page">
+    <a class="wjl_back" href="index.html">← 返回首页</a>
+
+    <header class="wjl_vision_head">
+      <p class="wjl_hero_eyebrow">IMAGE UNDERSTANDING</p>
+      <h1 class="wjl_vision_title">图像识别</h1>
+      <p class="wjl_vision_desc">上传一张图片，视觉语言模型会返回图片内容的中文描述，结果同时输出到浏览器控制台。</p>
+    </header>
+
+    <div class="wjl_api_bar">
+      <span class="wjl_api_label">后端接口</span>
+      <a class="wjl_api_link" href="/api/vision" target="_blank" rel="noopener">POST /api/vision</a>
+      <span class="wjl_api_full" id="wjl_vision_api_full"></span>
+      <span class="wjl_api_count" id="wjl_vision_status">就绪</span>
+    </div>
+
+    <div class="wjl_vision_layout">
+      <section class="wjl_vision_panel">
+        <h2 class="wjl_vision_panel_title">选择图片</h2>
+
+        <div class="wjl_vision_drop" id="wjl_vision_drop">
+          <input type="file" id="wjl_vision_file" accept="image/jpeg,image/png,image/webp,image/gif" hidden>
+          <div class="wjl_vision_placeholder" id="wjl_vision_placeholder">
+            <p class="wjl_vision_drop_main">点击选择图片，或拖拽到此处</p>
+            <p class="wjl_vision_drop_sub">支持 JPG / PNG / WEBP / GIF，不超过 10MB</p>
+          </div>
+          <img class="wjl_vision_preview" id="wjl_vision_preview" alt="待识别图片预览">
+        </div>
+
+        <p class="wjl_vision_tip" id="wjl_vision_tip"></p>
+
+        <button type="button" class="wjl_vision_btn" id="wjl_vision_btn" disabled>开始识别</button>
+      </section>
+
+      <section class="wjl_vision_panel">
+        <h2 class="wjl_vision_panel_title">识别结果</h2>
+
+        <div class="wjl_vision_result" id="wjl_vision_result" aria-live="polite">
+          <p class="wjl_vision_result_placeholder">识别完成后，这里会显示图片描述。</p>
+        </div>
+
+        <p class="wjl_vision_meta" id="wjl_vision_meta"></p>
+      </section>
+    </div>
+
+    <footer class="wjl_footer">
+      <span>wujunlong · 24001010912</span>
+      <span>视觉模型 · Qwen3-VL</span>
+    </footer>
+  </main>
+
+  <script src="js/wjl_background.js"></script>
+  <script src="js/wjl_vision.js"></script>
+</body>
+</html>

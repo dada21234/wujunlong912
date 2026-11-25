@@ -1,0 +1,21 @@
+{
+  "name": "wjl-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "wjlproject 后端服务：Node.js + Express（RESTful + MVC）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "adm-zip": "^0.6.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "multer": "^2.5.0",
+    "mysql2": "^3.11.0",
+    "pdf-parse": "^2.4.5",
+    "word-extractor": "^1.0.4"
+  }
+}

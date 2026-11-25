@@ -121,3 +121,10 @@
 - 模型：DeepSeek-V4.1-Flash
 - 提示词：把这个演示视频放到插到任务四里面，然后再帮我重新上传GitHub（附 20 秒真机录屏 video.mp4，117MB，超过 GitHub 单文件 100MB 限制，经授权下载 ffmpeg 便携包压缩为 1080p/5.1MB 后合入 media/wjl_shake_demo.mp4）
 
+
+## 2026-11-25 09:40:00
+- 模型：DeepSeek-V4.1-Flash
+- 提示词：将wjlproject这个文件夹上传的github仓库，并且将里面的内容与这个文件夹的index.html连接起来
+- 执行说明：wjlproject 自带独立 git 仓库（master，本地 1 次提交 + 未提交改动），已先在本地提交为 1d93dcd；因 GitHub CLI 未安装无法代建远程仓库，经用户确认改为「合入现有仓库」：原 .git 移至 .git-backups/wjlproject-20261125/ 并写入 .gitignore，代码作为 wjlproject/ 子目录入库，首页新增「13 / COURSE PROJECT」入口与 8 个子页面直达链接；node_modules 与 .env 由其自身 .gitignore 排除，未入库。
+
+

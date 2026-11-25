@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>科技新闻 | WJL 课程实践项目</title>
+  <!--
+    姓名：wujunlong | 学号：24001010912 | 时间：2026-11-19 | 大模型：DeepSeek-V4.1-Flash
+    说明：科技新闻列表页面，数据来自 MySQL 的 wjl_news 表，由后端 /api/news 接口返回。
+  -->
+  <link rel="stylesheet" href="css/wjl_index.css">
+  <link rel="stylesheet" href="css/wjl_news.css">
+</head>
+<body>
+  <canvas id="wjl_canvas" class="wjl_canvas"></canvas>
+  <div class="wjl_aura wjl_aura_left"></div>
+  <div class="wjl_aura wjl_aura_right"></div>
+
+  <main class="wjl_page">
+    <a class="wjl_back" href="index.html">← 返回首页</a>
+
+    <header class="wjl_news_head">
+      <p class="wjl_hero_eyebrow">TECH NEWS</p>
+      <h1 class="wjl_news_title">科技新闻</h1>
+      <p class="wjl_news_desc">新闻数据存储在 MySQL 数据表 wjl_news 中，由后端接口实时读取返回。</p>
+    </header>
+
+    <div class="wjl_api_bar">
+      <span class="wjl_api_label">后端接口</span>
+      <a class="wjl_api_link" href="/api/news" target="_blank" rel="noopener">GET /api/news</a>
+      <span class="wjl_api_full" id="wjl_news_api_full"></span>
+      <span class="wjl_api_count" id="wjl_news_total">加载中...</span>
+    </div>
+
+    <section class="wjl_news_list" id="wjl_news_list" aria-live="polite">
+      <p class="wjl_news_state">正在加载新闻数据...</p>
+    </section>
+
+    <footer class="wjl_footer">
+      <span>wujunlong · 24001010912</span>
+      <span>MySQL · wjl_news</span>
+    </footer>
+  </main>
+
+  <script src="js/wjl_background.js"></script>
+  <script src="js/wjl_news.js"></script>
+</body>
+</html>

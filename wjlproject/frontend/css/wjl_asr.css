@@ -1,0 +1,241 @@
+/*
+ * 姓名：wujunlong | 学号：24001010912 | 时间：2026-11-25 | 大模型：DeepSeek-V4.1-Flash
+ * 说明：语音识别页面样式，桌面双栏、移动端单栏。
+ */
+
+.wjl_asr_head {
+  margin-top: 18px;
+}
+
+.wjl_asr_title {
+  margin: 6px 0 8px;
+  font-size: clamp(30px, 5vw, 44px);
+  letter-spacing: -1px;
+  color: var(--wjl_text);
+}
+
+.wjl_asr_desc {
+  max-width: 720px;
+  color: var(--wjl_text_dim);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.wjl_asr_layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: 18px;
+  margin-top: 20px;
+}
+
+.wjl_asr_panel {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border: 1px solid var(--wjl_line);
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  min-width: 0;
+}
+
+.wjl_asr_panel_title {
+  margin: 0 0 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--wjl_text);
+}
+
+.wjl_asr_record_wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 0 8px;
+}
+
+.wjl_asr_record_btn {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #ff5a6a, #ff8a5a);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(255, 90, 106, 0.35);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.wjl_asr_record_btn:hover {
+  transform: scale(1.05);
+}
+
+.wjl_asr_record_btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.wjl_asr_record_icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: #fff;
+  transition: border-radius 0.2s ease, width 0.2s ease, height 0.2s ease;
+}
+
+.wjl_asr_record_btn.wjl_asr_recording .wjl_asr_record_icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  animation: wjl_asr_pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes wjl_asr_pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+.wjl_asr_record_hint {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: var(--wjl_text_dim);
+}
+
+.wjl_asr_timer {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--wjl_text);
+  font-variant-numeric: tabular-nums;
+}
+
+.wjl_asr_player {
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 10px;
+}
+
+.wjl_asr_divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 16px 0 12px;
+  color: var(--wjl_text_dim);
+  font-size: 12px;
+}
+
+.wjl_asr_divider::before,
+.wjl_asr_divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--wjl_line);
+}
+
+.wjl_asr_upload_btn {
+  display: block;
+  text-align: center;
+  padding: 10px 0;
+  border-radius: 10px;
+  border: 1px solid rgba(140, 180, 255, 0.4);
+  background: rgba(106, 168, 255, 0.1);
+  color: #bcd2ff;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.wjl_asr_upload_btn:hover {
+  background: rgba(106, 168, 255, 0.18);
+}
+
+.wjl_asr_file_name {
+  min-height: 16px;
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--wjl_text_dim);
+  word-break: break-all;
+}
+
+.wjl_asr_tip {
+  min-height: 16px;
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--wjl_text_dim);
+}
+
+.wjl_asr_tip.wjl_asr_tip_error {
+  color: #ff8f8f;
+}
+
+.wjl_asr_tip.wjl_asr_tip_ok {
+  color: #6ee7a8;
+}
+
+.wjl_asr_result_head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.wjl_asr_result_head .wjl_asr_panel_title {
+  margin: 0;
+}
+
+.wjl_asr_copy_btn {
+  padding: 5px 12px;
+  border: 1px solid rgba(140, 180, 255, 0.4);
+  border-radius: 8px;
+  background: transparent;
+  color: #bcd2ff;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.wjl_asr_copy_btn:hover {
+  background: rgba(106, 168, 255, 0.14);
+}
+
+.wjl_asr_result {
+  flex: 1;
+  min-height: 240px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--wjl_line);
+  background: rgba(8, 13, 26, 0.45);
+  color: var(--wjl_text);
+  font-size: 15px;
+  line-height: 1.9;
+  resize: vertical;
+  font-family: inherit;
+}
+
+.wjl_asr_result:focus {
+  outline: none;
+  border-color: rgba(140, 180, 255, 0.75);
+}
+
+.wjl_asr_meta {
+  min-height: 16px;
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--wjl_text_dim);
+}
+
+@media (max-width: 860px) {
+  .wjl_asr_layout {
+    grid-template-columns: 1fr;
+  }
+
+  .wjl_asr_panel {
+    padding: 16px;
+  }
+}
